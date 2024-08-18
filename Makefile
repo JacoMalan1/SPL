@@ -6,7 +6,7 @@ BINDIR = $(OUTDIR)/bin
 OBJDIR = $(OUTDIR)/obj
 SRCDIR = src
 INCDIR = include
-FILES = main.cpp
+FILES = main.cpp lexer.cpp
 
 all:
 	make $(BINDIR)/spl
