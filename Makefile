@@ -1,6 +1,8 @@
 OUTDIR = ./out
 CPP = clang++
-CPPFLAGS = -g -Wall -std=c++17 -I$(INCDIR)
+CPPFLAGS = -Wall -std=c++17 -I$(INCDIR)
+DEBUGFLAGS = -g
+RELEASEFLAGS = -O3
 LDFLAGS = 
 BINDIR = $(OUTDIR)/bin
 OBJDIR = $(OUTDIR)/obj
@@ -9,22 +11,35 @@ INCDIR = include
 FILES = main.cpp lexer.cpp token.cpp
 
 all:
-	make $(BINDIR)/spl
+	make $(BINDIR)/debug/spl
 
-$(BINDIR)/spl: $(patsubst %.cpp,$(OBJDIR)/%.o,$(FILES))
-	@mkdir -p $(BINDIR)
-	$(CPP) $(CPPFLAGS) -o $@ $^ $(LDFLAGS) 
+$(BINDIR)/debug/spl: $(patsubst %.cpp,$(OBJDIR)/debug/%.o,$(FILES))
+	@mkdir -p $(BINDIR)/debug
+	$(CPP) $(DEBUGFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS) 
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	@if [ ! -d $(OBJDIR) ]; then \
-		mkdir -p $(OBJDIR); \
+$(OBJDIR)/debug/%.o: $(SRCDIR)/%.cpp
+	@if [ ! -d $(OBJDIR)/debug ]; then \
+		mkdir -p $(OBJDIR)/debug; \
 	fi
 	
-	$(CPP) -c $(CPPFLAGS) -o $@ $<
+	$(CPP) -c $(DEBUGFLAGS) $(CPPFLAGS) -o $@ $<
 
-run: $(BINDIR)/spl $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(INCDIR)/*.h)
-	./$<
+$(BINDIR)/release/spl: $(patsubst %.cpp,$(OBJDIR)/release/%.o,$(FILES))
+	@mkdir -p $(BINDIR)/release
+	$(CPP) $(RELEASEFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS) 
+
+$(OBJDIR)/release/%.o: $(SRCDIR)/%.cpp
+	@if [ ! -d $(OBJDIR)/release ]; then \
+		mkdir -p $(OBJDIR)/release; \
+	fi
 	
+	$(CPP) -c $(RELEASEFLAGS) $(CPPFLAGS) -o $@ $<
+
+run: $(BINDIR)/debug/spl $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(INCDIR)/*.h)
+	./$<
+
+release: $(BINDIR)/release/spl $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(INCDIR)/*.h)
+debug: $(BINDIR)/debug/spl $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(INCDIR)/*.h)
 
 clean:
 	@if [ -d $(OUTDIR) ]; then \

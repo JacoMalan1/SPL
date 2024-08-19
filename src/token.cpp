@@ -183,4 +183,6 @@ std::string keyword_to_string(enum Keyword keyword) {
     return "void";
     break;
   }
+
+  return std::string();
 }
