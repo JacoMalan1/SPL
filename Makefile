@@ -1,12 +1,12 @@
 OUTDIR = ./out
 CPP = clang++
-CPPFLAGS = -g -Wall -std=c++14 -I$(INCDIR)
+CPPFLAGS = -g -Wall -std=c++17 -I$(INCDIR)
 LDFLAGS = 
 BINDIR = $(OUTDIR)/bin
 OBJDIR = $(OUTDIR)/obj
 SRCDIR = src
 INCDIR = include
-FILES = main.cpp lexer.cpp
+FILES = main.cpp lexer.cpp token.cpp
 
 all:
 	make $(BINDIR)/spl
