@@ -1,6 +1,6 @@
 OUTDIR = ./out
 CPP = clang++
-CPPFLAGS = -Wall -std=c++17 -I$(INCDIR)
+CPPFLAGS = -Wall -pedantic -Wextra -Werror -std=c++17 -I$(INCDIR)
 DEBUGFLAGS = -g
 RELEASEFLAGS = -O3
 LDFLAGS = 
