@@ -4,6 +4,15 @@
 #include <ostream>
 #include <string>
 
+struct TokenException : public std::exception {
+private:
+  std::string message;
+
+public:
+  explicit TokenException(const std::string &msg);
+  const char *what() const noexcept override;
+};
+
 enum TokenType { Variable, FunctionName, StringLiteral, NumLiteral, Keyword };
 enum Keyword {
   Main,
@@ -45,6 +54,8 @@ public:
   TokenType type() const;
   std::string to_string() const;
   std::string to_xml() const;
+
+  const std::string &get_str_data() const;
 
   static Token identifier(const std::string &ident);
   static Token function_name(const std::string &ident);

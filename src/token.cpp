@@ -186,3 +186,24 @@ std::string keyword_to_string(enum Keyword keyword) {
 
   return std::string();
 }
+
+TokenException::TokenException(const std::string &msg) : message(msg) {}
+const char *TokenException::what() const noexcept {
+  return this->message.c_str();
+}
+
+const std::string &Token::get_str_data() const {
+  switch (this->m_Type) {
+  case TokenType::Variable:
+    return this->m_Identifier;
+  case TokenType::Keyword:
+    throw new TokenException(
+        "Invalid access. Can't access data on keyword token.");
+  case TokenType::NumLiteral:
+    return this->m_NumLiteral;
+  case TokenType::FunctionName:
+    return this->m_Identifier;
+  case TokenType::StringLiteral:
+    return this->m_StringLiteral;
+  }
+}

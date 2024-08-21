@@ -1,8 +1,13 @@
-#include <cstring>
 #include <lexer.h>
 #include <regex>
 
-Lexer::Lexer(const std::string &input) : m_Source(input) {}
+Lexer::Lexer(const std::string &input) {
+  this->m_Source = input;
+  std::size_t loc;
+  while ((loc = this->m_Source.find("\n")) != std::string::npos) {
+    this->m_Source.replace(loc, 1, " ");
+  }
+}
 
 std::optional<Token> Lexer::next_token() {
   if (this->m_Source.empty()) {
@@ -78,11 +83,12 @@ std::optional<Token> Lexer::next_token() {
 
   std::regex string_lit_pattern("\"[A-Z][a-z]{0,7}\"");
   if (std::regex_match(token_str, string_lit_pattern)) {
+    token_str.erase(0, 1);
+    token_str.erase(token_str.length() - 1, 1);
     return Token::string_lit(token_str);
   }
 
-  std::regex num_pattern(
-      "(0|-?(0\\.[0-9]*[1-9])|[1-9][0-9]*|[1-9][0-9*]\\.[0-9]*[1-9])");
+  std::regex num_pattern("(0|-?[1-9]*[0-9](\\.[0-9]*[1-9])?)");
 
   if (std::regex_match(token_str, num_pattern)) {
     return Token::num_lit(token_str);

@@ -13,6 +13,7 @@ TEST(LexerTest, FunctionName) {
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
   EXPECT_EQ(token.value().type(), TokenType::FunctionName);
+  EXPECT_EQ(token.value().get_str_data(), "abc");
   delete lexer;
 }
 
@@ -21,6 +22,89 @@ TEST(LexerTest, VariableDecl) {
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
   EXPECT_EQ(token.value().type(), TokenType::Variable);
+  EXPECT_EQ(token.value().get_str_data(), "abc");
+  delete lexer;
+}
+
+TEST(LexerTest, StringLiteral) {
+  auto *lexer = new Lexer("\"Aabc\"");
+  auto token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::StringLiteral);
+  EXPECT_EQ(token.value().get_str_data(), "Aabc");
+  delete lexer;
+}
+
+TEST(LexerTest, ZeroNumLit) {
+  auto *lexer = new Lexer("0");
+  auto token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::NumLiteral);
+  EXPECT_EQ(token.value().get_str_data(), "0");
+  delete lexer;
+}
+
+TEST(LexerTest, FractionNumLit) {
+  auto *lexer = new Lexer("0.01");
+  auto token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::NumLiteral);
+  EXPECT_EQ(token.value().get_str_data(), "0.01");
+  delete lexer;
+
+  lexer = new Lexer("-0.01");
+  token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::NumLiteral);
+  EXPECT_EQ(token.value().get_str_data(), "-0.01");
+  delete lexer;
+
+  lexer = new Lexer("-0.00");
+  EXPECT_THROW(lexer->next_token(), LexerException);
+  delete lexer;
+
+  lexer = new Lexer("0.00");
+  EXPECT_THROW(lexer->next_token(), LexerException);
+  delete lexer;
+
+  lexer = new Lexer("0.0");
+  EXPECT_THROW(lexer->next_token(), LexerException);
+  delete lexer;
+
+  lexer = new Lexer("0.10");
+  EXPECT_THROW(lexer->next_token(), LexerException);
+  delete lexer;
+}
+
+TEST(LexerTest, RealNumLit) {
+  auto *lexer = new Lexer("1.01");
+  auto token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::NumLiteral);
+  EXPECT_EQ(token.value().get_str_data(), "1.01");
+  delete lexer;
+
+  lexer = new Lexer("-1.01");
+  token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::NumLiteral);
+  EXPECT_EQ(token.value().get_str_data(), "-1.01");
+  delete lexer;
+
+  lexer = new Lexer("-1.00");
+  EXPECT_THROW(lexer->next_token(), LexerException);
+  delete lexer;
+
+  lexer = new Lexer("1.00");
+  EXPECT_THROW(lexer->next_token(), LexerException);
+  delete lexer;
+
+  lexer = new Lexer("1.0");
+  EXPECT_THROW(lexer->next_token(), LexerException);
+  delete lexer;
+
+  lexer = new Lexer("1.30");
+  EXPECT_THROW(lexer->next_token(), LexerException);
   delete lexer;
 }
 
