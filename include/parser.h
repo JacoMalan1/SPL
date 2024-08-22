@@ -3,7 +3,8 @@
 
 #include <lexer.h>
 
-class Parser {
+class Parser
+{
 private:
   TokenStream m_Tokens;
 

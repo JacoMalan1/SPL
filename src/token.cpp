@@ -1,7 +1,8 @@
 #include <sstream>
 #include <token.h>
 
-Token Token::identifier(const std::string &ident) {
+Token Token::identifier(const std::string &ident)
+{
   Token res;
   res.m_Type = TokenType::Variable;
   res.m_Identifier = ident;
@@ -9,7 +10,8 @@ Token Token::identifier(const std::string &ident) {
   return res;
 }
 
-Token Token::function_name(const std::string &ident) {
+Token Token::function_name(const std::string &ident)
+{
   Token res;
   res.m_Type = TokenType::FunctionName;
   res.m_Identifier = ident;
@@ -17,7 +19,8 @@ Token Token::function_name(const std::string &ident) {
   return res;
 }
 
-Token Token::string_lit(const std::string &literal) {
+Token Token::string_lit(const std::string &literal)
+{
   Token res;
   res.m_Type = TokenType::StringLiteral;
   res.m_StringLiteral = literal;
@@ -25,7 +28,8 @@ Token Token::string_lit(const std::string &literal) {
   return res;
 }
 
-Token Token::num_lit(const std::string &literal) {
+Token Token::num_lit(const std::string &literal)
+{
   Token res;
   res.m_Type = TokenType::NumLiteral;
   res.m_NumLiteral = literal;
@@ -33,7 +37,8 @@ Token Token::num_lit(const std::string &literal) {
   return res;
 }
 
-Token Token::keyword(enum Keyword keyword) {
+Token Token::keyword(enum Keyword keyword)
+{
   Token res;
   res.m_Type = TokenType::Keyword;
   res.m_Keyword = keyword;
@@ -43,10 +48,12 @@ Token Token::keyword(enum Keyword keyword) {
 
 TokenType Token::type() const { return this->m_Type; }
 
-std::string Token::to_string() const {
+std::string Token::to_string() const
+{
   std::stringstream stream;
 
-  switch (this->m_Type) {
+  switch (this->m_Type)
+  {
   case TokenType::Variable:
     stream << "Var(" << this->m_Identifier << ")";
     break;
@@ -66,17 +73,20 @@ std::string Token::to_string() const {
   return stream.str();
 }
 
-std::ostream &operator<<(std::ostream &stream, const Token &token) {
+std::ostream &operator<<(std::ostream &stream, const Token &token)
+{
   stream << token.to_string();
   return stream;
 }
 
-std::string Token::to_xml() const {
+std::string Token::to_xml() const
+{
   static std::size_t id = 0;
   std::string token_class;
   std::string word;
 
-  switch (this->m_Type) {
+  switch (this->m_Type)
+  {
   case TokenType::FunctionName:
     token_class = "F";
     word = this->m_Identifier;
@@ -111,8 +121,10 @@ std::string Token::to_xml() const {
   return stream.str();
 }
 
-std::string keyword_to_string(enum Keyword keyword) {
-  switch (keyword) {
+std::string keyword_to_string(enum Keyword keyword)
+{
+  switch (keyword)
+  {
   case Keyword::Main:
     return "main";
     break;
@@ -188,12 +200,15 @@ std::string keyword_to_string(enum Keyword keyword) {
 }
 
 TokenException::TokenException(const std::string &msg) : message(msg) {}
-const char *TokenException::what() const noexcept {
+const char *TokenException::what() const noexcept
+{
   return this->message.c_str();
 }
 
-const std::string &Token::get_str_data() const {
-  switch (this->m_Type) {
+const std::string &Token::get_str_data() const
+{
+  switch (this->m_Type)
+  {
   case TokenType::Variable:
     return this->m_Identifier;
   case TokenType::Keyword:
@@ -205,5 +220,7 @@ const std::string &Token::get_str_data() const {
     return this->m_Identifier;
   case TokenType::StringLiteral:
     return this->m_StringLiteral;
+  default:
+    throw new TokenException("Invalid token type.");
   }
 }

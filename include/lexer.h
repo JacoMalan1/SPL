@@ -7,7 +7,8 @@
 #include <token.h>
 #include <vector>
 
-struct LexerException : public std::exception {
+struct LexerException : public std::exception
+{
 private:
   std::string msg;
 
@@ -16,7 +17,8 @@ public:
   const char *what() const noexcept override;
 };
 
-class TokenStream {
+class TokenStream
+{
 private:
   std::vector<Token> m_Tokens;
 
@@ -27,7 +29,8 @@ public:
   std::string to_xml() const;
 };
 
-class Lexer {
+class Lexer
+{
 private:
   std::string m_Source;
 

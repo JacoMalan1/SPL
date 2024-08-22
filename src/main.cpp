@@ -4,8 +4,10 @@
 #include <parser.h>
 #include <sstream>
 
-int main(int argc, const char **argv) {
-  if (argc < 2) {
+int main(int argc, const char **argv)
+{
+  if (argc < 2)
+  {
     std::cerr << "Usage: splc [file|-]" << std::endl
               << " `-` - Read input from stdin" << std::endl;
     return -1;
@@ -13,24 +15,30 @@ int main(int argc, const char **argv) {
 
   auto input = argv[1];
   std::string source;
-  if (std::string(input) == "-") {
+  if (std::string(input) == "-")
+  {
     std::stringstream stream;
 
     std::string line;
-    while (std::getline(std::cin, line)) {
+    while (std::getline(std::cin, line))
+    {
       stream << line << std::endl;
     }
     source = stream.str();
-  } else {
+  }
+  else
+  {
     std::ifstream fs(input);
-    if (!fs.is_open()) {
+    if (!fs.is_open())
+    {
       std::cerr << "Failed to open file!" << std::endl;
       return -1;
     }
 
     std::stringstream stream;
     std::string line;
-    while (std::getline(fs, line)) {
+    while (std::getline(fs, line))
+    {
       stream << line << std::endl;
     }
     source = stream.str();
@@ -40,7 +48,8 @@ int main(int argc, const char **argv) {
   auto stream = lexer->lex_all();
 
   std::ofstream file("tokens.xml");
-  if (!file.is_open()) {
+  if (!file.is_open())
+  {
     return -1;
   }
 
