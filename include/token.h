@@ -13,7 +13,14 @@ public:
   const char *what() const noexcept override;
 };
 
-enum TokenType { Variable, FunctionName, StringLiteral, NumLiteral, Keyword };
+enum TokenType {
+  Variable,
+  FunctionName,
+  StringLiteral,
+  NumLiteral,
+  Keyword,
+  Punctuation
+};
 enum Keyword {
   Main,
   Num,
@@ -49,6 +56,7 @@ private:
   std::string m_StringLiteral;
   std::string m_NumLiteral;
   enum Keyword m_Keyword;
+  std::string m_Punct;
 
 public:
   TokenType type() const;
@@ -62,6 +70,7 @@ public:
   static Token string_lit(const std::string &literal);
   static Token num_lit(const std::string &literal);
   static Token keyword(enum Keyword keyword);
+  static Token punct(char punct);
 };
 
 std::ostream &operator<<(std::ostream &stream, const Token &token);

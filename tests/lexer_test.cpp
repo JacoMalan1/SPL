@@ -113,3 +113,39 @@ TEST(LexerTest, InvalidToken) {
   EXPECT_THROW(lexer->next_token(), LexerException);
   delete lexer;
 }
+
+TEST(LexerTest, Punctuation) {
+  auto *lexer = new Lexer("F_abc( V_a , V_b )");
+
+  auto token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::FunctionName);
+  EXPECT_EQ(token.value().get_str_data(), "abc");
+
+  token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::Punctuation);
+  EXPECT_EQ(token.value().get_str_data(), "(");
+
+  token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::Variable);
+  EXPECT_EQ(token.value().get_str_data(), "a");
+
+  token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::Punctuation);
+  EXPECT_EQ(token.value().get_str_data(), ",");
+
+  token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::Variable);
+  EXPECT_EQ(token.value().get_str_data(), "b");
+
+  token = lexer->next_token();
+  EXPECT_TRUE(token.has_value());
+  EXPECT_EQ(token.value().type(), TokenType::Punctuation);
+  EXPECT_EQ(token.value().get_str_data(), ")");
+
+  delete lexer;
+}

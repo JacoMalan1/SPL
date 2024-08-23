@@ -15,12 +15,28 @@ std::optional<Token> Lexer::next_token() {
   }
 
   auto next_delim = this->m_Source.find(" ");
-  std::string token_str = this->m_Source.substr(0, next_delim);
 
-  if (next_delim != std::string::npos) {
-    this->m_Source = this->m_Source.substr(next_delim + 1);
+  if (next_delim == 0) {
+    this->m_Source.erase(0, 1);
+    next_delim = this->m_Source.find(" ");
+  }
+
+  auto next_brace = this->m_Source.find("(");
+  std::string token_str;
+
+  if (this->m_Source[0] == '(') {
+    this->m_Source.erase(0, 1);
+    return Token::punct('(');
+  } else if (next_delim <= next_brace) {
+    token_str = this->m_Source.substr(0, next_delim);
+    if (next_delim != std::string::npos) {
+      this->m_Source = this->m_Source.substr(next_delim + 1);
+    } else {
+      this->m_Source = std::string();
+    }
   } else {
-    this->m_Source = std::string();
+    token_str = this->m_Source.substr(0, next_brace);
+    this->m_Source = this->m_Source.substr(next_brace);
   }
 
   if (token_str == "main") {
@@ -69,6 +85,20 @@ std::optional<Token> Lexer::next_token() {
     return Token::keyword(Keyword::Div);
   } else if (token_str == "void") {
     return Token::keyword(Keyword::Void);
+  } else if (token_str == "<") {
+    return Token::punct('<');
+  } else if (token_str == "=") {
+    return Token::punct('=');
+  } else if (token_str == ";") {
+    return Token::punct(';');
+  } else if (token_str == ",") {
+    return Token::punct(',');
+  } else if (token_str == ")") {
+    return Token::punct(')');
+  } else if (token_str == "{") {
+    return Token::punct('{');
+  } else if (token_str == "}") {
+    return Token::punct('}');
   }
 
   std::regex var_pattern("V_[a-z]([a-z]|[0-9])*");

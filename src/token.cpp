@@ -41,6 +41,16 @@ Token Token::keyword(enum Keyword keyword) {
   return res;
 }
 
+Token Token::punct(char punct) {
+  Token res;
+  res.m_Type = TokenType::Punctuation;
+  std::stringstream stream;
+  stream << punct;
+  res.m_Punct = std::string(stream.str());
+
+  return res;
+}
+
 TokenType Token::type() const { return this->m_Type; }
 
 std::string Token::to_string() const {
@@ -61,6 +71,9 @@ std::string Token::to_string() const {
     break;
   case TokenType::Keyword:
     stream << this->m_Keyword;
+    break;
+  case TokenType::Punctuation:
+    stream << this->m_Punct;
     break;
   }
   return stream.str();
@@ -96,6 +109,10 @@ std::string Token::to_xml() const {
   case TokenType::Variable:
     token_class = "V";
     word = this->m_Identifier;
+    break;
+  case TokenType::Punctuation:
+    token_class = "reserved_keyword";
+    word = this->m_Punct;
     break;
   }
 
@@ -205,7 +222,9 @@ const std::string &Token::get_str_data() const {
     return this->m_Identifier;
   case TokenType::StringLiteral:
     return this->m_StringLiteral;
+  case TokenType::Punctuation:
+    return this->m_Punct;
   default:
-    throw new TokenException("Invalid token type.");
+    throw TokenException("Invalid token type");
   }
 }
