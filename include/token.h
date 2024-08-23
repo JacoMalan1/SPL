@@ -4,8 +4,7 @@
 #include <ostream>
 #include <string>
 
-struct TokenException : public std::exception
-{
+struct TokenException : public std::exception {
 private:
   std::string message;
 
@@ -14,16 +13,8 @@ public:
   const char *what() const noexcept override;
 };
 
-enum TokenType
-{
-  Variable,
-  FunctionName,
-  StringLiteral,
-  NumLiteral,
-  Keyword
-};
-enum Keyword
-{
+enum TokenType { Variable, FunctionName, StringLiteral, NumLiteral, Keyword };
+enum Keyword {
   Main,
   Num,
   Text,
@@ -51,8 +42,7 @@ enum Keyword
 
 std::string keyword_to_string(enum Keyword keyword);
 
-class Token
-{
+class Token {
 private:
   TokenType m_Type;
   std::string m_Identifier;

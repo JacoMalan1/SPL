@@ -1,16 +1,14 @@
 #include <gtest/gtest.h>
 #include <lexer.h>
 
-TEST(LexerTest, EmptyTest)
-{
+TEST(LexerTest, EmptyTest) {
   auto *lexer = new Lexer("");
   auto token = lexer->next_token();
   EXPECT_FALSE(token.has_value());
   delete lexer;
 }
 
-TEST(LexerTest, FunctionName)
-{
+TEST(LexerTest, FunctionName) {
   auto *lexer = new Lexer("F_abc");
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
@@ -19,8 +17,7 @@ TEST(LexerTest, FunctionName)
   delete lexer;
 }
 
-TEST(LexerTest, VariableDecl)
-{
+TEST(LexerTest, VariableDecl) {
   auto *lexer = new Lexer("V_abc");
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
@@ -29,8 +26,7 @@ TEST(LexerTest, VariableDecl)
   delete lexer;
 }
 
-TEST(LexerTest, StringLiteral)
-{
+TEST(LexerTest, StringLiteral) {
   auto *lexer = new Lexer("\"Aabc\"");
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
@@ -39,8 +35,7 @@ TEST(LexerTest, StringLiteral)
   delete lexer;
 }
 
-TEST(LexerTest, ZeroNumLit)
-{
+TEST(LexerTest, ZeroNumLit) {
   auto *lexer = new Lexer("0");
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
@@ -49,8 +44,7 @@ TEST(LexerTest, ZeroNumLit)
   delete lexer;
 }
 
-TEST(LexerTest, FractionNumLit)
-{
+TEST(LexerTest, FractionNumLit) {
   auto *lexer = new Lexer("0.01");
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
@@ -82,8 +76,7 @@ TEST(LexerTest, FractionNumLit)
   delete lexer;
 }
 
-TEST(LexerTest, RealNumLit)
-{
+TEST(LexerTest, RealNumLit) {
   auto *lexer = new Lexer("1.01");
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
@@ -115,8 +108,7 @@ TEST(LexerTest, RealNumLit)
   delete lexer;
 }
 
-TEST(LexerTest, InvalidToken)
-{
+TEST(LexerTest, InvalidToken) {
   auto *lexer = new Lexer("invalid");
   EXPECT_THROW(lexer->next_token(), LexerException);
   delete lexer;
