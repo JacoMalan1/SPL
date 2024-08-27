@@ -3,3 +3,4 @@ build/
 
 #IDEs
 .vscode
+.direnv
