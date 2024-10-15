@@ -218,10 +218,10 @@ TokenStream Lexer::lex_all()
   return TokenStream(tokens);
 }
 
-TokenStream::TokenStream(const std::vector<Token> &tokens) {
-  this->m_Tokens = std::vector<Token>(tokens.size());
-
-  for (auto it = tokens.rbegin(); it != tokens.rend(); it++) {
+TokenStream::TokenStream(const std::vector<Token> &tokens)
+{
+  for (auto it = tokens.begin(); it != tokens.end(); it++)
+  {
     this->m_Tokens.push_back(*it);
   }
 }

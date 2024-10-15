@@ -1,6 +1,1 @@
-main
-begin
-    varname = numliteral;
-    print varname;
-    halt;
-end
+main begin end

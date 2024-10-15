@@ -145,13 +145,13 @@ std::string Parser::getAction(int state, const std::string &token)
 {
   std::string action = this->parseTable[std::to_string(state)][token];
 
-  if (action == "")
-  {
-    std::string epsilon = "''";
-    action = this->parseTable[std::to_string(state)][epsilon];
+  // if (action == "")
+  // {
+  //   std::string epsilon = "''";
+  //   action = this->parseTable[std::to_string(state)][epsilon];
 
-    m_Tokens.insert(m_Tokens.begin(), m_Tokens.front());
-  }
+  //   m_Tokens.insert(m_Tokens.begin(), m_Tokens.front());
+  // }
 
   return action;
 }
@@ -199,7 +199,7 @@ void Parser::parse()
       {
         currentToken = "numliteral";
       }
-      else if (currentTokenType == StringLiteral)
+      else if (currentTokenType == StringLiteral && m_Tokens.front().get_str_data() != "$")
       {
         currentToken = "textliteral";
       }
@@ -235,7 +235,7 @@ void Parser::parse()
         stackString += s;
       }
 
-      std::cout << "Current state: " << currentState << " Next token: " << currentToken << " Action: " << action << " Stack: " << stackString << std::endl;
+      std::cout << "Current state: " << currentState << " Current token: " << currentToken << " Action: " << action << " Stack: " << stackString << std::endl;
 
       if (action[0] == 's')
       {
