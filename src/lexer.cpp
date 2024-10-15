@@ -86,7 +86,7 @@ std::optional<Token> Lexer::next_token()
   {
     return Token::keyword(Keyword::Print);
   }
-  else if (token_str == "input")
+  else if (token_str == "<input")
   {
     return Token::keyword(Keyword::Input);
   }
@@ -145,10 +145,6 @@ std::optional<Token> Lexer::next_token()
   else if (token_str == "void")
   {
     return Token::keyword(Keyword::Void);
-  }
-  else if (token_str == "<")
-  {
-    return Token::punct('<');
   }
   else if (token_str == "=")
   {
