@@ -4,3 +4,5 @@ build/
 #IDEs
 .vscode
 .direnv
+compile_commands.json
+.cache
