@@ -35,7 +35,7 @@ std::vector<std::string> splitCSVLine(const std::string &line)
   {
     if (c == '\"')
     {
-      inQuotes = !inQuotes; // Toggle quoted field
+      inQuotes = !inQuotes; // toggle quoted field
     }
     else if (c == ',' && !inQuotes)
     {
@@ -44,10 +44,10 @@ std::vector<std::string> splitCSVLine(const std::string &line)
     }
     else
     {
-      token += c; // Add character to current token
+      token += c; // add character to current token
     }
   }
-  result.push_back(token); // Push the last token
+  result.push_back(token); // push the last token
 
   return result;
 }
@@ -64,10 +64,10 @@ std::vector<std::vector<std::string>> readCSV(const std::string &filename)
   std::vector<std::vector<std::string>> data;
   std::string line;
 
-  // Read each line of the CSV
+  // read each line of the CSV
   while (std::getline(file, line))
   {
-    // Split the line into fields, handling quoted fields correctly
+    // split the line into fields, handling quoted fields correctly
     std::vector<std::string> row = splitCSVLine(line);
     data.push_back(row);
   }
@@ -130,7 +130,6 @@ void Parser::loadGrammarRules(const std::string &filename)
     }
 
     grammarRules.push_back({lhs, rhsSymbols});
-    std::cout << "Loaded grammar rule: " << lhs << " -> ";
     for (const auto &s : rhsSymbols)
     {
       std::cout << s << " ";
@@ -144,15 +143,6 @@ void Parser::loadGrammarRules(const std::string &filename)
 std::string Parser::getAction(int state, const std::string &token)
 {
   std::string action = this->parseTable[std::to_string(state)][token];
-
-  // if (action == "")
-  // {
-  //   std::string epsilon = "''";
-  //   action = this->parseTable[std::to_string(state)][epsilon];
-
-  //   m_Tokens.insert(m_Tokens.begin(), m_Tokens.front());
-  // }
-
   return action;
 }
 
@@ -172,14 +162,12 @@ void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule)
 
   int currentState = this->stateStack.top().state;
   std::string nonTerminal = rule.first;
-  std::cout << "state is now " << currentState << " and nonTerminal is " << nonTerminal << std::endl;
   int gotoState = std::stoi(getAction(currentState, nonTerminal));
   this->stateStack.push({gotoState, nonTerminal});
 }
 
 void Parser::parse()
 {
-  // this->stateStack.push({0, "$"});
   this->stateStack.push({0, ""});
 
   try
@@ -215,27 +203,8 @@ void Parser::parse()
       std::string action = getAction(currentState, currentToken);
 
       // print stack
-      auto tempStack = stateStack;
-      std::vector<std::string> lol;
-      while (!tempStack.empty())
-      {
-        std::stringstream ss;
-        ss << "(" << tempStack.top().state << ", " << tempStack.top().symbol << ") ";
-        lol.push_back(ss.str());
-        tempStack.pop();
-      }
-
-      // reverse the vector
-      std::reverse(lol.begin(), lol.end());
-
-      // store vector in string
-      std::string stackString = "";
-      for (auto &s : lol)
-      {
-        stackString += s;
-      }
-
-      std::cout << "Current state: " << currentState << " Current token: " << currentToken << " Action: " << action << " Stack: " << stackString << std::endl;
+      std::string stackString = getStackString(this->stateStack);
+      std::cout << "Action: " << action << " Stack: " << stackString << std::endl;
 
       if (action[0] == 's')
       {
@@ -257,7 +226,7 @@ void Parser::parse()
       }
       else
       {
-        std::cerr << "Error: Unexpected token " << currentToken << " in state " << currentState << " Action: " << action << std::endl;
+        std::cerr << "Syntax Error: Unexpected token " << currentToken << " in state " << currentState << " Action: " << action << std::endl;
         return;
       }
     }
@@ -274,4 +243,28 @@ void Parser::parse()
   {
     std::cerr << "Unknown exception caught during parsing" << std::endl;
   }
+}
+
+std::string getStackString(std::stack<StackItem> stack)
+{
+  auto tempStack = stack;
+  std::vector<std::string> stackVector;
+  while (!tempStack.empty())
+  {
+    std::stringstream ss;
+    ss << "(" << tempStack.top().state << ", " << tempStack.top().symbol << ") ";
+    stackVector.push_back(ss.str());
+    tempStack.pop();
+  }
+
+  // reverse the vector
+  std::reverse(stackVector.begin(), stackVector.end());
+
+  // store vector in string
+  std::string stackString = "";
+  for (auto &s : stackVector)
+  {
+    stackString += s;
+  }
+  return stackString;
 }

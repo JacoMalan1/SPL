@@ -2,6 +2,7 @@
 #include <optional>
 #include <regex>
 #include <vector>
+#include <iostream>
 
 Lexer::Lexer(const std::string &input)
 {
@@ -11,6 +12,13 @@ Lexer::Lexer(const std::string &input)
   {
     this->m_Source.replace(loc, 1, " ");
   }
+
+  // additional preprocessing to help lexer with tokenisation (for multiline and more structured code)
+  std::regex space_regex("\\s+"); // match any sequence of spaces (including tabs)
+
+  // replace all sequences of spaces and tabs with a single space
+  std::string cleaned_source = std::regex_replace(this->m_Source, space_regex, " ");
+  this->m_Source = cleaned_source;
 }
 
 std::optional<Token> Lexer::next_token()
@@ -256,8 +264,10 @@ std::string TokenStream::to_xml() const
   return stream.str();
 }
 
-std::optional<Token> TokenStream::next() {
-  if (this->m_Tokens.size() == 0) {
+std::optional<Token> TokenStream::next()
+{
+  if (this->m_Tokens.size() == 0)
+  {
     return {};
   }
 
