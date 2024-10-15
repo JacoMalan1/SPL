@@ -1,5 +1,7 @@
 #include <lexer.h>
+#include <optional>
 #include <regex>
+#include <vector>
 
 Lexer::Lexer(const std::string &input)
 {
@@ -220,7 +222,13 @@ TokenStream Lexer::lex_all()
   return TokenStream(tokens);
 }
 
-TokenStream::TokenStream(const std::vector<Token> &tokens) : m_Tokens(tokens) {}
+TokenStream::TokenStream(const std::vector<Token> &tokens) {
+  this->m_Tokens = std::vector<Token>(tokens.size());
+
+  for (auto it = tokens.rbegin(); it != tokens.rend(); it++) {
+    this->m_Tokens.push_back(*it);
+  }
+}
 
 // auto TokenStream::begin() const { return this->m_Tokens.begin(); }
 // auto TokenStream::end() const { return this->m_Tokens.end(); }
@@ -250,4 +258,14 @@ std::string TokenStream::to_xml() const
   stream << "</TOKENSTREAM>";
 
   return stream.str();
+}
+
+std::optional<Token> TokenStream::next() {
+  if (this->m_Tokens.size() == 0) {
+    return {};
+  }
+
+  Token ret = this->m_Tokens[this->m_Tokens.size() - 1];
+  this->m_Tokens.pop_back();
+  return ret;
 }
