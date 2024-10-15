@@ -1,21 +1,9 @@
 #!/bin/bash
 
-# check if the build directory exists, if not, create it
-if [ ! -d build ]; then
-  mkdir build
-fi
+# set the build directory
+BUILD_DIR="build"
 
-# navigate to the build directory
-cd build
-
-# run CMake to configure the project
-cmake ..
-
-# build the project
-make splc
-
-# run the program
-./splc
-
-# navigate back to the root directory
-cd ..
+# run the executable with any arguments passed to the script ($@ represents all passed arguments)
+echo "Running the program with arguments: $@"
+echo ""
+"$BUILD_DIR"/splc "$@"

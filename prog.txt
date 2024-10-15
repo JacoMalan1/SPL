@@ -1,0 +1,6 @@
+main
+begin
+    varname = numliteral;
+    print varname;
+    halt;
+end
