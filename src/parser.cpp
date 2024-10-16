@@ -3,6 +3,8 @@
 #include <sstream>
 #include <algorithm>
 
+std::atomic<int> SyntaxTreeNode::syntaxTreeNodeCounter{0};
+
 Parser::Parser(TokenStream tokens) : m_Tokens(tokens.getTokens())
 {
   this->loadParseTable("parse_table.csv");
