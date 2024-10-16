@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <atomic>
 
 struct StackItem
 {
@@ -16,10 +17,12 @@ struct StackItem
 
 struct SyntaxTreeNode
 {
+  static std::atomic<int> syntaxTreeNodeCounter;
+  int id;
   std::string symbol;
   std::vector<SyntaxTreeNode *> children;
 
-  SyntaxTreeNode(const std::string &sym) : symbol(sym) {}
+  SyntaxTreeNode(const std::string &sym) : id(syntaxTreeNodeCounter++), symbol(sym) {}
 
   void addChild(SyntaxTreeNode *child)
   {
@@ -32,6 +35,7 @@ struct SyntaxTreeNode
     {
       std::cout << "  ";
     }
+    // std::cout << symbol << " (ID: " << id << ")" << std::endl;
     std::cout << symbol << std::endl;
     for (const auto &child : this->children)
     {
