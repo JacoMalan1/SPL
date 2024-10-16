@@ -6,18 +6,18 @@
 
 Lexer::Lexer(const std::string &input)
 {
-  this->m_Source = input;
-  std::size_t loc;
-  while ((loc = this->m_Source.find("\n")) != std::string::npos)
-  {
-    this->m_Source.replace(loc, 1, " ");
-  }
+  // input preprocessing to help lexer with tokenisation
 
-  // additional preprocessing to help lexer with tokenisation (for multiline and more structured code)
-  std::regex space_regex("\\s+"); // match any sequence of spaces (including tabs)
+  std::regex punctuation_regex("([;,.()=+\\-*/<>])"); // match all punctuation marks
 
-  // replace all sequences of spaces and tabs with a single space
-  std::string cleaned_source = std::regex_replace(this->m_Source, space_regex, " ");
+  // add spaces around all punctuation marks
+  std::string pre_processed_input = std::regex_replace(input, punctuation_regex, " $1 ");
+
+  std::regex space_regex("\\s+"); // match any sequence of whitespace characters (spaces, tabs, newlines)
+
+  // replace all sequences of whitespace characters with a single space
+  std::string cleaned_source = std::regex_replace(pre_processed_input, space_regex, " ");
+
   this->m_Source = cleaned_source;
 }
 
