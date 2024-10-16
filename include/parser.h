@@ -26,6 +26,7 @@ private:
   std::string getAction(int state, const std::string &token);
   void shift(int state, std::string currentToken);
   void reduce(std::pair<std::string, std::vector<std::string>> rule);
+  std::string getStateStackString();
 
 public:
   explicit Parser(TokenStream tokens);

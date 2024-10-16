@@ -6,8 +6,8 @@
 
 Parser::Parser(TokenStream tokens) : m_Tokens(tokens.getTokens())
 {
-  loadParseTable("parse_table.csv");
-  loadGrammarRules("grammar.txt");
+  this->loadParseTable("parse_table.csv");
+  this->loadGrammarRules("grammar.txt");
 }
 
 Parser::Parser(const Parser &other) : m_Tokens(other.m_Tokens), parseTable(other.parseTable), stateStack(other.stateStack) {}
@@ -116,7 +116,7 @@ void Parser::loadGrammarRules(const std::string &filename)
     }
 
     std::getline(iss, rhs);
-    rhs.erase(0, rhs.find_first_not_of(" \t")); // Trim leading whitespace
+    rhs.erase(0, rhs.find_first_not_of(" \t")); // trim leading whitespace
 
     std::vector<std::string> rhsSymbols;
     std::istringstream rhsStream(rhs);
@@ -130,11 +130,6 @@ void Parser::loadGrammarRules(const std::string &filename)
     }
 
     grammarRules.push_back({lhs, rhsSymbols});
-    for (const auto &s : rhsSymbols)
-    {
-      std::cout << s << " ";
-    }
-    std::cout << std::endl;
   }
 
   file.close();
@@ -203,7 +198,7 @@ void Parser::parse()
       std::string action = getAction(currentState, currentToken);
 
       // print stack
-      std::string stackString = getStackString(this->stateStack);
+      std::string stackString = getStateStackString();
       std::cout << "Action: " << action << " Stack: " << stackString << std::endl;
 
       if (action[0] == 's')
@@ -245,9 +240,9 @@ void Parser::parse()
   }
 }
 
-std::string getStackString(std::stack<StackItem> stack)
+std::string Parser::getStateStackString()
 {
-  auto tempStack = stack;
+  auto tempStack = this->stateStack;
   std::vector<std::string> stackVector;
   while (!tempStack.empty())
   {
