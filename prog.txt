@@ -1,6 +1,6 @@
 main
 begin
-    V_varname = 3;
-    print V_varname;
+    V_num = 3;
+    print V_num;
     halt;
 end

@@ -1,7 +1,6 @@
 #include "parser.h"
 #include <fstream>
 #include <sstream>
-#include <iostream>
 #include <algorithm>
 
 Parser::Parser(TokenStream tokens) : m_Tokens(tokens.getTokens())
@@ -144,16 +143,25 @@ std::string Parser::getAction(int state, const std::string &token)
 void Parser::shift(int state, std::string currentToken)
 {
   this->stateStack.push({state, currentToken});
+  this->syntaxTreeStack.push(new SyntaxTreeNode(currentToken));
 }
 
 void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule)
 {
   int productionLength = rule.second.size();
 
+  // create a new node for the LHS of the production
+  SyntaxTreeNode *lhsNode = new SyntaxTreeNode(rule.first);
+
   for (int i = 0; i < productionLength; ++i)
   {
     this->stateStack.pop();
+    auto rhsNode = syntaxTreeStack.top(); // get the node for the RHS of the production
+    this->syntaxTreeStack.pop();
+    lhsNode->addChild(rhsNode); // add the RHS node as a child of the LHS node
   }
+
+  this->syntaxTreeStack.push(lhsNode); // push the LHS node onto the stack
 
   int currentState = this->stateStack.top().state;
   std::string nonTerminal = rule.first;
@@ -161,18 +169,18 @@ void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule)
   this->stateStack.push({gotoState, nonTerminal});
 }
 
-void Parser::parse()
+SyntaxTreeNode *Parser::parse()
 {
   this->stateStack.push({0, ""});
 
   try
   {
-    m_Tokens.push_back(Token::string_lit("$")); // add end of input token
+    this->m_Tokens.push_back(Token::string_lit("$")); // add end of input token
 
     while (!m_Tokens.empty())
     {
-      int currentState = stateStack.top().state;
-      TokenType currentTokenType = m_Tokens.front().type();
+      int currentState = this->stateStack.top().state;
+      TokenType currentTokenType = this->m_Tokens.front().type();
       std::string currentToken = "";
       if (currentTokenType == Variable)
       {
@@ -182,7 +190,7 @@ void Parser::parse()
       {
         currentToken = "numliteral";
       }
-      else if (currentTokenType == StringLiteral && m_Tokens.front().get_str_data() != "$")
+      else if (currentTokenType == StringLiteral && this->m_Tokens.front().get_str_data() != "$")
       {
         currentToken = "textliteral";
       }
@@ -192,14 +200,13 @@ void Parser::parse()
       }
       else
       {
-        currentToken = m_Tokens.front().get_str_data();
+        currentToken = this->m_Tokens.front().get_str_data();
       }
 
-      std::string action = getAction(currentState, currentToken);
+      std::string action = this->getAction(currentState, currentToken);
 
-      // print stack
-      std::string stackString = getStateStackString();
-      std::cout << "Action: " << action << " Stack: " << stackString << std::endl;
+      // print state stack
+      this->printStateStack(action);
 
       if (action[0] == 's')
       {
@@ -216,13 +223,14 @@ void Parser::parse()
       }
       else if (action == "acc")
       {
-        std::cout << "Input successfully parsed!" << std::endl;
-        return;
+        std::cout << "\nInput successfully parsed, syntax tree is shown below\n" << std::endl;
+        auto syntaxTreeRoot = this->syntaxTreeStack.top();
+        syntaxTreeRoot->printTree(); // print the final syntax tree
+        return syntaxTreeRoot;
       }
       else
       {
         std::cerr << "Syntax Error: Unexpected token " << currentToken << " in state " << currentState << " Action: " << action << std::endl;
-        return;
       }
     }
   }
@@ -238,9 +246,11 @@ void Parser::parse()
   {
     std::cerr << "Unknown exception caught during parsing" << std::endl;
   }
+
+  return nullptr;
 }
 
-std::string Parser::getStateStackString()
+void Parser::printStateStack(std::string action = "")
 {
   auto tempStack = this->stateStack;
   std::vector<std::string> stackVector;
@@ -261,5 +271,13 @@ std::string Parser::getStateStackString()
   {
     stackString += s;
   }
-  return stackString;
+
+  if (action != "")
+  {
+    std::cout << "Action: " << action << " Stack: " << stackString << std::endl;
+  }
+  else
+  {
+    std::cout << "Stack: " << stackString << std::endl;
+  }
 }
