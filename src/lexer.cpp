@@ -8,7 +8,7 @@ Lexer::Lexer(const std::string &input)
 {
   // input preprocessing to help lexer with tokenisation
 
-  std::regex punctuation_regex("([;,.()=+\\-*/<>])"); // match all punctuation marks
+  std::regex punctuation_regex("([;,()={}])"); // match all punctuation marks as defined in the grammar
 
   // add spaces around all punctuation marks
   std::string pre_processed_input = std::regex_replace(input, punctuation_regex, " $1 ");
