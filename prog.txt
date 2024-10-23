@@ -1,6 +1,14 @@
 main
+num V_var1, num V_var2, num V_result, 
 begin
-    V_varname = 3 ;
-    print V_varname ;
-    halt ;
+    V_var1 = 5;
+    V_var2 = 10;
+    if eq ( V_var1, V_var2 ) then
+        begin
+            V_result = 1;
+        end
+    else
+        begin
+            V_result = 0;
+        end
 end

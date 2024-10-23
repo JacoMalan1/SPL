@@ -44,7 +44,8 @@ enum Keyword {
   Sub,
   Mul,
   Div,
-  Void
+  Void,
+  Return
 };
 
 std::string keyword_to_string(enum Keyword keyword);

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <lexer.h>
 #include <parser.h>
+#include <typechecker.h>
 #include <sstream>
 
 int main(int argc, const char **argv)
@@ -44,6 +45,7 @@ int main(int argc, const char **argv)
     source = stream.str();
   }
 
+  // lexical analysis
   auto *lexer = new Lexer(source);
   auto stream = lexer->lex_all();
 
@@ -56,10 +58,18 @@ int main(int argc, const char **argv)
   file << stream.to_xml() << std::endl;
   file.close();
 
-  // parser
+  // syntax analysis
   auto *parser = new Parser(stream);
-  parser->parse();
+  // parser->parse();
+  SyntaxTreeNode *syntaxTreeRoot = parser->parse();
 
+  // type checking
+  auto *typeChecker = new TypeChecker(syntaxTreeRoot);
+  typeChecker->check();
+
+  delete typeChecker;
+  delete parser;
   delete lexer;
+  
   return 0;
 }

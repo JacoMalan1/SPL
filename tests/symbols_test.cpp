@@ -25,7 +25,7 @@ protected:
       stream << letters[letter_dist(gen)];
     }
 
-    Symbol new_symbol = Symbol(stream.str(), Symbol::SymbolType::Variable);
+    Symbol new_symbol = Symbol(stream.str(), "textliteral");
     this->table().bind(new_symbol);
     return new_symbol;
   }
@@ -39,7 +39,7 @@ TEST_F(SymbolTableFixture, EmptyTest) {
 }
 
 TEST_F(SymbolTableFixture, SingleSymbol) {
-  table().bind(Symbol("x", Symbol::SymbolType::Variable));
+  table().bind(Symbol("x", "varname"));
   Symbol s = bind_random();
   std::optional<Symbol> x = table().lookup(s.name());
 

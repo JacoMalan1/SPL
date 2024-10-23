@@ -104,6 +104,8 @@ std::optional<Token> Lexer::next_token() {
     return Token::keyword(Keyword::Div);
   } else if (token_str == "void") {
     return Token::keyword(Keyword::Void);
+  } else if (token_str == "return") {
+    return Token::keyword(Keyword::Return);
   } else if (token_str == "=") {
     return Token::punct('=');
   } else if (token_str == ";") {
@@ -120,12 +122,14 @@ std::optional<Token> Lexer::next_token() {
 
   std::regex var_pattern("V_[a-z]([a-z]|[0-9])*");
   if (std::regex_match(token_str, var_pattern)) {
-    return Token::identifier(token_str.substr(2));
+    // return Token::identifier(token_str.substr(2));
+    return Token::identifier(token_str);
   }
 
   std::regex func_name_pattern("F_[a-z]([a-z]|[0-9])*");
   if (std::regex_match(token_str, func_name_pattern)) {
-    return Token::function_name(token_str.substr(2));
+    // return Token::function_name(token_str.substr(2));
+    return Token::function_name(token_str);
   }
 
   std::regex string_lit_pattern("\"[A-Z][a-z]{0,7}\"");

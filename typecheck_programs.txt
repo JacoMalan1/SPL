@@ -1,0 +1,43 @@
+// POSITIVE TEST CASES
+// Test 1: Basic Program with Arithmetic Operations
+main
+num V_var1, num V_var2, num V_result, 
+begin
+    V_var1 = 5;
+    V_var2 = 10;
+    if eq ( V_var1, V_var2 ) then
+        begin
+            V_result = 1;
+        end
+    else
+        begin
+            V_result = 0;
+        end
+end
+
+// Test 2: Unary Operation Test (Square Root)
+main
+num V_var1, num V_var2, 
+begin
+    V_var1 = 16;
+    V_var2 = sqrt(V_var1);
+    print V_var2;
+end
+
+
+// Test 3: Logical and Comparison Operations in Conditionals
+main
+num V_var1, num V_var2, num V_result, 
+begin
+    V_var1 = 5;
+    V_var2 = 10;
+    if eq ( V_var1, V_var2 ) then
+        begin
+            V_result = 1;
+        end
+    else
+        begin
+            V_result = 0;
+        end
+    print V_result;
+end

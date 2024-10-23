@@ -212,6 +212,9 @@ std::string keyword_to_string(enum Keyword keyword)
   case Keyword::Void:
     return "void";
     break;
+  case Keyword::Return:
+    return "return";
+    break;
   }
 
   return std::string();
