@@ -41,21 +41,39 @@ void TypeChecker::checkProgram(SyntaxTreeNode *node)
 {
     // PROG -> main GLOBVARS ALGO FUNCTIONS
 
-    for (auto child : node->getChildren())
+    // start by checking global variables
+    if (node->getChildren()[1]->getSymbol() == "GLOBVARS")
     {
-        if (child->getSymbol() == "GLOBVARS")
-        {
-            checkGlobVars(child);
-        }
-        else if (child->getSymbol() == "ALGO")
-        {
-            checkAlgo(child);
-        }
-        else if (child->getSymbol() == "FUNCTIONS")
-        {
-            checkFunctions(child);
-        }
+        checkGlobVars(node->getChildren()[1]);
     }
+
+    // next, check function declarations
+    if (node->getChildren()[3]->getSymbol() == "FUNCTIONS")
+    {
+        checkFunctions(node->getChildren()[3]);
+    }
+
+    // finally, check the main algorithm block
+    if (node->getChildren()[2]->getSymbol() == "ALGO")
+    {
+        checkAlgo(node->getChildren()[2]);
+    }
+
+    // for (auto child : node->getChildren())
+    // {
+    //     if (child->getSymbol() == "GLOBVARS")
+    //     {
+    //         checkGlobVars(child);
+    //     }
+    //     else if (child->getSymbol() == "ALGO")
+    //     {
+    //         checkAlgo(child);
+    //     }
+    //     else if (child->getSymbol() == "FUNCTIONS")
+    //     {
+    //         checkFunctions(child);
+    //     }
+    // }
 }
 
 void TypeChecker::checkGlobVars(SyntaxTreeNode *globVarsNode)
@@ -255,20 +273,20 @@ void TypeChecker::checkAssign(SyntaxTreeNode *node)
 std::optional<std::string> TypeChecker::checkCall(SyntaxTreeNode *node)
 {
     // CALL -> FNAME ( ATOMIC , ATOMIC , ATOMIC )
-    std::string functionName = node->getChildren()[0]->getActualValue(); // get the function name
+    std::string functionName = node->getChildren()[0]->getChildren()[0]->getActualValue(); // get the function name
 
     // check if the function exists in the symbol table
     auto functionSymbol = symbolTable->lookup(functionName);
     if (!functionSymbol)
     {
-        throw TypeError("Undeclared function '" + functionName + "' called.");
+        throw TypeError("Undeclared function '" + functionName + "' called", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
     }
 
-    // verify that the symbol is indeed a function
-    if (functionSymbol.value().type() != "fname")
-    {
-        throw TypeError("Type Error: '" + functionName + "' is not a function.");
-    }
+    // // verify that the symbol is indeed a function
+    // if (functionSymbol.value().type() != "fname")
+    // {
+    //     throw TypeError("'" + functionName + "' is not a function", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
+    // }
 
     std::vector<std::string> argTypes; // store the types of the arguments
     for (auto child : node->getChildren())
@@ -645,12 +663,8 @@ void TypeChecker::checkDecl(SyntaxTreeNode *node)
 void TypeChecker::checkHeader(SyntaxTreeNode *node)
 {
     // HEADER -> FTYP FNAME ( VNAME , VNAME , VNAME )
-    std::string returnType = node->getChildren()[0]->getActualValue();   // FTYP (function return type)
-    std::string functionName = node->getChildren()[1]->getActualValue(); // FNAME (function name)
-
-    // insert the function into the symbol table
-    Symbol functionSymbol(functionName, "fname");
-    symbolTable->bind(functionSymbol); // bind the function name in the current scope
+    std::string returnType = node->getChildren()[0]->getChildren()[0]->getActualValue();   // FTYP (function return type)
+    std::string functionName = node->getChildren()[1]->getChildren()[0]->getActualValue(); // FNAME (function name)
 
     // parameter types (assuming exactly 3 parameters as specified by the grammar)
     std::vector<std::string> paramTypes;
@@ -659,14 +673,19 @@ void TypeChecker::checkHeader(SyntaxTreeNode *node)
     {
         int index = paramIndexes[m];
 
-        std::string paramName = node->getChildren()[index]->getActualValue(); // get the parameter name (variable name)
-        std::string paramType = symbolTable->lookup(paramName)->type();       // lookup type of each parameter
+        std::string paramName = node->getChildren()[index]->getChildren()[0]->getActualValue(); // get the parameter name (variable name)
+        std::string paramType = symbolTable->lookup(paramName)->type();                         // lookup type of each parameter
         paramTypes.push_back(paramType);
     }
+
+    // insert the function into the symbol table
+    Symbol functionSymbol(functionName, returnType);
 
     // store the parameter types and return type in the function's symbol
     functionSymbol.setParamTypes(paramTypes);
     functionSymbol.setReturnType(returnType);
+
+    symbolTable->bind(functionSymbol); // bind the function name in the current scope
 }
 
 void TypeChecker::checkBody(SyntaxTreeNode *node)

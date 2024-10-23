@@ -14,10 +14,7 @@ Lexer::Lexer(const std::string &input)
   // loop until the end of the string
   while (getline(ss, line))
   {
-    if (!line.empty())
-    {
       this->unprocessed_input.push_back(line);
-    }
   }
 
   this->m_Source = input;
