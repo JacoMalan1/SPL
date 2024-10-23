@@ -6,13 +6,14 @@
 #include <string>
 #include "symbol.h"
 
-struct TypeCheckerException : public std::exception
+struct TypeError : public std::exception
 {
 private:
   std::string msg;
 
 public:
-  explicit TypeCheckerException(const std::string &msg);
+  explicit TypeError(const std::string &msg, std::string filename, const int &line);
+  explicit TypeError(const std::string &msg);
   const char *what() const noexcept override;
 };
 
@@ -21,8 +22,10 @@ class TypeChecker
 public:
   TypeChecker(SyntaxTreeNode *root);
   void check();
+  void setFilename(const std::string &filename);
 
 private:
+  std::string filename;
   SyntaxTreeNode *root;
   std::shared_ptr<SymbolTable> symbolTable;
 

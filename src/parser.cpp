@@ -150,28 +150,28 @@ std::string Parser::getAction(int state, const std::string &token)
   return action;
 }
 
-void Parser::shift(int state, std::string currentTokenSymbol, std::string currentTokenValue)
+void Parser::shift(int state, std::string currentTokenSymbol, std::string currentTokenValue, int line)
 {
   this->stateStack.push({state, currentTokenSymbol});
-  this->syntaxTreeStack.push(new SyntaxTreeNode(currentTokenSymbol, currentTokenValue));
+  this->syntaxTreeStack.push(new SyntaxTreeNode(currentTokenSymbol, currentTokenValue, line));
 }
 
-void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule)
+void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule, int line)
 {
   int productionLength = rule.second.size();
 
   // create a new node for the LHS of the production
-  SyntaxTreeNode *lhsNode = new SyntaxTreeNode(rule.first);
+  SyntaxTreeNode *lhsNode = new SyntaxTreeNode(rule.first, line);
 
-  if (delayReduce && rule.second.size() > 0 && rule.second[0] == "COMMAND")
-  {
-    delayReduce = false;
-    productionLength = 1;
-  }
-  else if (rule.second.size() > 0 && ((rule.second[0] == "ASSIGN") || (rule.second[0] == "CALL") || (rule.second[0] == "BRANCH")))
-  {
-    delayReduce = true;
-  }
+  // if (delayReduce && rule.second.size() > 0 && rule.second[0] == "COMMAND")
+  // {
+  //   delayReduce = false;
+  //   productionLength = 1;
+  // }
+  // else if (rule.second.size() > 0 && ((rule.second[0] == "ASSIGN") || (rule.second[0] == "CALL") || (rule.second[0] == "BRANCH")))
+  // {
+  //   delayReduce = true;
+  // }
 
   for (int i = 0; i < productionLength; ++i)
   {
@@ -246,7 +246,7 @@ SyntaxTreeNode *Parser::parse()
       if (action[0] == 's')
       {
         int nextState = std::stoi(action.substr(1));
-        shift(nextState, currentTokenSymbol, currentTokenValue);
+        shift(nextState, currentTokenSymbol, currentTokenValue, this->m_Tokens.front().get_line_number());
 
         m_Tokens.erase(m_Tokens.begin());
       }
@@ -255,7 +255,7 @@ SyntaxTreeNode *Parser::parse()
         int ruleNum = std::stoi(action.substr(1));
         auto rule = grammarRules[ruleNum];
 
-        reduce(rule);
+        reduce(rule,  this->m_Tokens.front().get_line_number());
       }
       else if (action == "acc")
       {

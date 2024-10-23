@@ -15,6 +15,7 @@ int main(int argc, const char **argv)
   }
 
   auto input = argv[1];
+  std::string filename = "";
   std::string source;
   if (std::string(input) == "-")
   {
@@ -29,6 +30,7 @@ int main(int argc, const char **argv)
   }
   else
   {
+    filename = input;
     std::ifstream fs(input);
     if (!fs.is_open())
     {
@@ -60,16 +62,16 @@ int main(int argc, const char **argv)
 
   // syntax analysis
   auto *parser = new Parser(stream);
-  // parser->parse();
   SyntaxTreeNode *syntaxTreeRoot = parser->parse();
 
   // type checking
   auto *typeChecker = new TypeChecker(syntaxTreeRoot);
+  typeChecker->setFilename(filename);
   typeChecker->check();
 
   delete typeChecker;
   delete parser;
   delete lexer;
-  
+
   return 0;
 }

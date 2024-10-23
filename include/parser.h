@@ -32,10 +32,11 @@ struct SyntaxTreeNode
   int id;
   std::string symbol;
   std::string tokenValue;
+  int lineNumber;
   std::vector<SyntaxTreeNode *> children;
 
-  SyntaxTreeNode(const std::string &sym, const std::string &val) : id(syntaxTreeNodeCounter++), symbol(sym), tokenValue(val) {}
-  SyntaxTreeNode(const std::string &sym) : id(syntaxTreeNodeCounter++), symbol(sym) {}
+  SyntaxTreeNode(const std::string &sym, const std::string &val, const int &line) : id(syntaxTreeNodeCounter++), symbol(sym), tokenValue(val), lineNumber(line) {}
+  SyntaxTreeNode(const std::string &sym, const int &line) : id(syntaxTreeNodeCounter++), symbol(sym), lineNumber(line) {}
 
   void addChild(SyntaxTreeNode *child)
   {
@@ -82,6 +83,11 @@ struct SyntaxTreeNode
       return this->symbol;
     }
   }
+
+  int getLineNumber() const
+  {
+    return this->lineNumber;
+  }
 };
 
 class Parser
@@ -97,8 +103,8 @@ private:
   void loadParseTable(const std::string &filename);
   void loadGrammarRules(const std::string &filename);
   std::string getAction(int state, const std::string &token);
-  void shift(int state, std::string currentTokenSymbol, std::string currentTokenValue);
-  void reduce(std::pair<std::string, std::vector<std::string>> rule);
+  void shift(int state, std::string currentTokenSymbol, std::string currentTokenValue, int line);
+  void reduce(std::pair<std::string, std::vector<std::string>> rule, int line);
   void printStateStack(std::string action);
 
 public:

@@ -32,11 +32,13 @@ public:
 class Lexer {
 private:
   std::string m_Source;
+  std::vector<std::string> unprocessed_input;
 
 public:
   Lexer(const std::string &input);
   std::optional<Token> next_token();
   TokenStream lex_all();
+  int getTokenLineNumber(std::string tokenValue);
 };
 
 #endif
