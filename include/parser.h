@@ -2,13 +2,13 @@
 #define SPL_PARSER_H
 
 #include <lexer.h>
-#include <unordered_map>
 #include <map>
 #include <stack>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <atomic>
+#include "parser_file_handler.h"
 
 struct SyntaxError : public std::exception
 {
@@ -101,8 +101,8 @@ private:
   std::stack<SyntaxTreeNode *> syntaxTreeStack;
   std::vector<std::pair<std::string, std::vector<std::string>>> grammarRules;
 
-  void loadParseTable(const std::string &filename);
-  void loadGrammarRules(const std::string &filename);
+  void loadParseTable(ParserFileHandler fileHandler);
+  void loadGrammarRules(ParserFileHandler fileHandler);
   std::string getAction(int state, const std::string &token);
   void shift(int state, std::string currentTokenSymbol, std::string currentTokenValue, int line);
   void reduce(std::pair<std::string, std::vector<std::string>> rule, int line);

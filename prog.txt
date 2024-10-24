@@ -18,7 +18,7 @@ void F_func1 ( V_var1, V_var2, V_var3 )
 {
     num V_var10, num V_var11, num V_var12,
     begin
-    V_var1 = 3;
+    V_var1 = "Yoo";
     end
 }
 end
