@@ -63,3 +63,39 @@ void F_another(V_temp1, V_temp2, V_temp3) {
 }
 end
 end
+void F_another(V_a, V_b, V_c) {
+    num V_sum, num V_product, text V_output,
+    begin
+    V_sum = add(V_a, V_c);
+        V_product = mul(V_a, V_c);
+        if eq(V_sum, 10) then
+            begin
+                V_output = "Yoyoyo";
+                print V_output;
+            end
+        else
+            begin
+                V_output = "Hello";
+                print V_output;
+            end;
+    end
+}
+end
+void F_another(V_a, V_b, V_c) {
+    num V_sum, num V_product, text V_output,
+    begin
+    V_sum = add(V_a, V_c);
+        V_product = mul(V_a, V_c);
+        if eq(V_sum, 10) then
+            begin
+                V_output = "Yoyoyo";
+                print V_output;
+            end
+        else
+            begin
+                V_output = "Hello";
+                print V_output;
+            end;
+    end
+}
+end

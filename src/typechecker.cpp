@@ -675,13 +675,15 @@ void TypeChecker::checkHeader(SyntaxTreeNode *node)
         paramTypes.push_back(paramType);
     }
 
-    // insert the function into the symbol table
+    // check if the function is already declared in the symbol table
+    if (symbolTable->lookup(functionName) != std::nullopt)
+    {
+        throw TypeError("Function '" + functionName + "' was already declared", filename, node->getChildren()[1]->getChildren()[0]->getLineNumber());
+    }
+
     Symbol functionSymbol(functionName, returnType);
-
-    // store the parameter types and return type in the function's symbol
-    functionSymbol.setParamTypes(paramTypes);
-
-    symbolTable->bind(functionSymbol); // bind the function name in the current scope
+    functionSymbol.setParamTypes(paramTypes); // store the parameter types in the function's symbol
+    symbolTable->bind(functionSymbol);        // bind the function name in the current scope
 }
 
 void TypeChecker::checkBody(SyntaxTreeNode *node)
