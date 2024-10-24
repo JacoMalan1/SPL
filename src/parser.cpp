@@ -3,6 +3,22 @@
 #include <sstream>
 #include <algorithm>
 
+SyntaxError::SyntaxError(const std::string &msg, std::string filename, const int &line)
+{
+  if (filename.empty())
+  {
+    this->msg = "\033[31mSyntax Error\033[0m: " + msg;
+  }
+  else
+  {
+    this->msg = filename + ":" + std::to_string(line) + ": \033[31mSyntax Error\033[0m: " + msg;
+  }
+}
+
+SyntaxError::SyntaxError(const std::string &msg) : msg("\033[31mType Error\033[0m: " + msg) {}
+
+const char *SyntaxError::what() const noexcept { return this->msg.c_str(); }
+
 std::atomic<int> SyntaxTreeNode::syntaxTreeNodeCounter{0};
 
 Parser::Parser(TokenStream tokens) : m_Tokens(tokens.getTokens())
@@ -40,7 +56,7 @@ std::vector<std::string> splitCSVLine(const std::string &line)
     }
     else if (c == ',' && !inQuotes)
     {
-      result.push_back(token); // End of a field, push to result
+      result.push_back(token); // end of a field, push to result
       token.clear();
     }
     else
@@ -122,13 +138,18 @@ void Parser::loadGrammarRules(const std::string &filename)
     std::vector<std::string> rhsSymbols;
     std::istringstream rhsStream(rhs);
     std::string symbol;
+
+    // std::cout << lhs << " -> ";
     while (rhsStream >> symbol)
     {
       if (symbol != "''")
       {
         rhsSymbols.push_back(symbol);
       }
+
+      // std::cout << symbol << " ";
     }
+    // std::cout << std::endl;
 
     grammarRules.push_back({lhs, rhsSymbols});
   }
@@ -142,18 +163,28 @@ std::string Parser::getAction(int state, const std::string &token)
   return action;
 }
 
-void Parser::shift(int state, std::string currentToken)
+void Parser::shift(int state, std::string currentTokenSymbol, std::string currentTokenValue, int line)
 {
-  this->stateStack.push({state, currentToken});
-  this->syntaxTreeStack.push(new SyntaxTreeNode(currentToken));
+  this->stateStack.push({state, currentTokenSymbol});
+  this->syntaxTreeStack.push(new SyntaxTreeNode(currentTokenSymbol, currentTokenValue, line));
 }
 
-void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule)
+void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule, int line)
 {
   int productionLength = rule.second.size();
 
   // create a new node for the LHS of the production
-  SyntaxTreeNode *lhsNode = new SyntaxTreeNode(rule.first);
+  SyntaxTreeNode *lhsNode = new SyntaxTreeNode(rule.first, line);
+
+  // if (delayReduce && rule.second.size() > 0 && rule.second[0] == "COMMAND")
+  // {
+  //   delayReduce = false;
+  //   productionLength = 1;
+  // }
+  // else if (rule.second.size() > 0 && ((rule.second[0] == "ASSIGN") || (rule.second[0] == "CALL") || (rule.second[0] == "BRANCH")))
+  // {
+  //   delayReduce = true;
+  // }
 
   for (int i = 0; i < productionLength; ++i)
   {
@@ -167,7 +198,15 @@ void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule)
 
   int currentState = this->stateStack.top().state;
   std::string nonTerminal = rule.first;
-  int gotoState = std::stoi(getAction(currentState, nonTerminal));
+
+  // get the GOTO action after reduction
+  std::string gotoAction = this->getAction(currentState, nonTerminal);
+  if (gotoAction.empty())
+  {
+    return;
+  }
+
+  int gotoState = std::stoi(gotoAction);
   this->stateStack.push({gotoState, nonTerminal});
 }
 
@@ -183,37 +222,42 @@ SyntaxTreeNode *Parser::parse()
     {
       int currentState = this->stateStack.top().state;
       TokenType currentTokenType = this->m_Tokens.front().type();
-      std::string currentToken = "";
-      if (currentTokenType == Variable)
+      std::string currentTokenSymbol = "";
+      std::string currentTokenValue = "";
+      if (currentTokenType == TokenType::Variable)
       {
-        currentToken = "varname";
+        currentTokenSymbol = "varname";
+        currentTokenValue = this->m_Tokens.front().get_str_data();
       }
-      else if (currentTokenType == NumLiteral)
+      else if (currentTokenType == TokenType::NumLiteral)
       {
-        currentToken = "numliteral";
+        currentTokenSymbol = "numliteral";
+        currentTokenValue = this->m_Tokens.front().get_str_data();
       }
-      else if (currentTokenType == StringLiteral && this->m_Tokens.front().get_str_data() != "$")
+      else if (currentTokenType == TokenType::StringLiteral && this->m_Tokens.front().get_str_data() != "$")
       {
-        currentToken = "textliteral";
+        currentTokenSymbol = "textliteral";
+        currentTokenValue = this->m_Tokens.front().get_str_data();
       }
-      else if (currentTokenType == FunctionName)
+      else if (currentTokenType == TokenType::FunctionName)
       {
-        currentToken = "fname";
+        currentTokenSymbol = "fname";
+        currentTokenValue = this->m_Tokens.front().get_str_data();
       }
       else
       {
-        currentToken = this->m_Tokens.front().get_str_data();
+        currentTokenSymbol = this->m_Tokens.front().get_str_data();
       }
 
-      std::string action = this->getAction(currentState, currentToken);
+      std::string action = this->getAction(currentState, currentTokenSymbol);
 
       // print state stack
-      this->printStateStack(action);
+      // this->printStateStack(action);
 
       if (action[0] == 's')
       {
         int nextState = std::stoi(action.substr(1));
-        shift(nextState, currentToken);
+        shift(nextState, currentTokenSymbol, currentTokenValue, this->m_Tokens.front().get_line_number());
 
         m_Tokens.erase(m_Tokens.begin());
       }
@@ -221,28 +265,32 @@ SyntaxTreeNode *Parser::parse()
       {
         int ruleNum = std::stoi(action.substr(1));
         auto rule = grammarRules[ruleNum];
-        reduce(rule);
+
+        reduce(rule, this->m_Tokens.front().get_line_number());
       }
       else if (action == "acc")
       {
-        std::cout << "\nInput successfully parsed, syntax tree is shown below\n" << std::endl;
+        std::cout << "\nInput successfully parsed, syntax tree is shown below\n"
+                  << std::endl;
         auto syntaxTreeRoot = this->syntaxTreeStack.top();
         syntaxTreeRoot->printTree(); // print the final syntax tree
         return syntaxTreeRoot;
       }
       else
       {
-        std::cerr << "Syntax Error: Unexpected token " << currentToken << " in state " << currentState << " Action: " << action << std::endl;
+        throw SyntaxError("Unexpected token symbol " + currentTokenSymbol + " in state " + std::to_string(currentState) + " Action: " + action);
       }
     }
   }
   catch (const std::exception *e)
   {
-    std::cerr << "Exception caught during parsing: " << e->what() << std::endl;
+    std::cerr << "\n"
+              << e->what() << std::endl;
   }
   catch (const std::exception &e)
   {
-    std::cerr << "Exception caught during parsing: " << e.what() << std::endl;
+    std::cerr << "\n"
+              << e.what() << std::endl;
   }
   catch (...)
   {

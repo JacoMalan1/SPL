@@ -44,7 +44,8 @@ enum Keyword {
   Sub,
   Mul,
   Div,
-  Void
+  Void,
+  Return
 };
 
 std::string keyword_to_string(enum Keyword keyword);
@@ -57,6 +58,7 @@ private:
   std::string m_NumLiteral;
   enum Keyword m_Keyword;
   std::string m_Punct;
+  int m_LineNumber = 0;
 
 public:
   TokenType type() const;
@@ -64,6 +66,8 @@ public:
   std::string to_xml() const;
 
   const std::string get_str_data() const;
+  int get_line_number() const;
+  void set_line_number(const int &line_number);
 
   static Token identifier(const std::string &ident);
   static Token function_name(const std::string &ident);

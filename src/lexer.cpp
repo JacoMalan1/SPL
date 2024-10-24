@@ -4,7 +4,19 @@
 #include <regex>
 #include <vector>
 
-Lexer::Lexer(const std::string &input) {
+Lexer::Lexer(const std::string &input)
+{
+  // split the input line by line and store in a vector
+  // of strings (data to be used later during type checking)
+  std::stringstream ss(input);
+  std::string line;
+
+  // loop until the end of the string
+  while (getline(ss, line))
+  {
+      this->unprocessed_input.push_back(line);
+  }
+
   this->m_Source = input;
   std::size_t loc;
   while ((loc = this->m_Source.find("\n")) != std::string::npos) {
@@ -104,6 +116,8 @@ std::optional<Token> Lexer::next_token() {
     return Token::keyword(Keyword::Div);
   } else if (token_str == "void") {
     return Token::keyword(Keyword::Void);
+  } else if (token_str == "return") {
+    return Token::keyword(Keyword::Return);
   } else if (token_str == "=") {
     return Token::punct('=');
   } else if (token_str == ";") {
@@ -120,12 +134,14 @@ std::optional<Token> Lexer::next_token() {
 
   std::regex var_pattern("V_[a-z]([a-z]|[0-9])*");
   if (std::regex_match(token_str, var_pattern)) {
-    return Token::identifier(token_str.substr(2));
+    // return Token::identifier(token_str.substr(2));
+    return Token::identifier(token_str);
   }
 
   std::regex func_name_pattern("F_[a-z]([a-z]|[0-9])*");
   if (std::regex_match(token_str, func_name_pattern)) {
-    return Token::function_name(token_str.substr(2));
+    // return Token::function_name(token_str.substr(2));
+    return Token::function_name(token_str);
   }
 
   std::regex string_lit_pattern("\"[A-Z][a-z]{0,7}\"");
@@ -153,10 +169,27 @@ TokenStream Lexer::lex_all() {
   std::optional<Token> t;
 
   while ((t = this->next_token()).has_value()) {
+    t.value().set_line_number(this->getTokenLineNumber(t.value().get_str_data()));
     tokens.push_back(t.value());
   }
 
   return TokenStream(tokens);
+}
+
+int Lexer::getTokenLineNumber(std::string tokenValue) {
+
+  for (size_t i = 0; i < this->unprocessed_input.size(); i++) {
+    if (this->unprocessed_input[i].find(tokenValue) != std::string::npos) {
+      std::string line = this->unprocessed_input[i];
+      std::string updatedLine = line.replace(line.find(tokenValue), tokenValue.length(), "");
+
+     // replace the old line with the updated line
+      this->unprocessed_input[i] = updatedLine;
+      return i + 1;
+    }
+  }
+
+  return -1;
 }
 
 TokenStream::TokenStream(const std::vector<Token> &tokens) {

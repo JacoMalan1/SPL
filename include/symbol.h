@@ -5,24 +5,33 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
-class Symbol {
+class Symbol
+{
 public:
-  enum class SymbolType { Variable };
-
-  Symbol(const std::string &identifier, SymbolType type);
+  Symbol(const std::string &identifier, std::string type);
 
   const std::string &name() const;
-  SymbolType type() const;
+  std::string type() const;
 
   bool operator==(const Symbol &other) const;
 
+  std::vector<std::string> getParamTypes() const;
+  std::string getReturnType() const;
+
+  void setParamTypes(std::vector<std::string> paramTypes);
+  void setReturnType(std::string returnType);
+
 private:
-  SymbolType m_Type;
   std::string m_Ident;
+  std::string m_Type;
+  std::vector<std::string> paramTypes; // function symbol parameter types
+  std::string returnType;              // function symbol return type
 };
 
-class SymbolTable {
+class SymbolTable
+{
 public:
   SymbolTable(const SymbolTable &other);
   SymbolTable &operator=(const SymbolTable &other);

@@ -212,6 +212,9 @@ std::string keyword_to_string(enum Keyword keyword)
   case Keyword::Void:
     return "void";
     break;
+  case Keyword::Return:
+    return "return";
+    break;
   }
 
   return std::string();
@@ -245,3 +248,7 @@ const std::string Token::get_str_data() const
     throw TokenException("Invalid token type");
   }
 }
+
+int Token::get_line_number() const { return this->m_LineNumber; }
+
+void Token::set_line_number(const int &line_number) { this->m_LineNumber = line_number; }
