@@ -77,6 +77,12 @@ void TypeChecker::checkGlobVars(SyntaxTreeNode *globVarsNode)
     std::string type = vtypNode->getChildren()[0]->getSymbol();          // the type of the variable (num, text)
     std::string varname = vnameNode->getChildren()[0]->getActualValue(); // the actual variable name
 
+    // check if variable is already declared in the symbol table
+    if (symbolTable->lookup(varname) != std::nullopt)
+    {
+        throw TypeError("Variable '" + varname + "' was already declared", filename, vnameNode->getChildren()[0]->getLineNumber());
+    }
+
     // add the variable and its type to the symbol table
     Symbol symbol(varname, type);
     symbolTable->bind(symbol);
@@ -647,7 +653,7 @@ void TypeChecker::checkDecl(SyntaxTreeNode *node)
 void TypeChecker::checkHeader(SyntaxTreeNode *node)
 {
     // HEADER -> FTYP FNAME ( VNAME , VNAME , VNAME )
-    std::string returnType = node->getChildren()[0]->getChildren()[0]->getSymbol();   // FTYP (function return type)
+    std::string returnType = node->getChildren()[0]->getChildren()[0]->getSymbol();        // FTYP (function return type)
     std::string functionName = node->getChildren()[1]->getChildren()[0]->getActualValue(); // FNAME (function name)
 
     // parameter types (assuming exactly 3 parameters as specified by the grammar)
@@ -715,6 +721,12 @@ void TypeChecker::checkLocVars(SyntaxTreeNode *node)
         {
             std::string varType = node->getChildren()[i]->getChildren()[0]->getSymbol();
             std::string varName = node->getChildren()[i + 1]->getChildren()[0]->getActualValue(); // (local variable name)
+
+            // check if variable is already declared in the symbol table
+            if (symbolTable->lookup(varName) != std::nullopt)
+            {
+                throw TypeError("Variable '" + varName + "' was already declared", filename, node->getChildren()[i + 1]->getChildren()[0]->getLineNumber());
+            }
 
             Symbol varSymbol(varName, varType); // create a symbol for the variable
             symbolTable->bind(varSymbol);       // bind the local variable in the current scope

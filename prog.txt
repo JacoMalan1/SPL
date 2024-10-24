@@ -3,7 +3,7 @@ num V_x, text V_msg, num V_y, num V_res, num V_a, num V_b, num V_c,
 begin
     V_x = 4;
     V_y = 20.076;
-    V_msg = "Hallot";
+    V_msg = "Byecoco";
     V_res = F_compute(5, V_x, V_y);
     V_res <input;
 
@@ -45,8 +45,20 @@ num F_compute(V_a, V_b, V_c) {
     end
 }
 void F_another(V_temp1, V_temp2, V_temp3) {
-    num V_sum, num V_product, text V_msg,
+    num V_sum, num V_product, text V_output,
     begin
+    V_sum = add(V_temp1, V_temp3);
+        V_product = mul(V_temp1, V_temp3);
+        if eq(V_sum, 10) then
+            begin
+                V_output = "Yoyoyo";
+                print V_output;
+            end
+        else
+            begin
+                V_output = "Hello";
+                print V_output;
+            end;
     end
 }
 end
