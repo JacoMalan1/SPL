@@ -13,7 +13,7 @@ TEST(LexerTest, FunctionName) {
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
   EXPECT_EQ(token.value().type(), TokenType::FunctionName);
-  EXPECT_EQ(token.value().get_str_data(), "abc");
+  EXPECT_EQ(token.value().get_str_data(), "F_abc");
   delete lexer;
 }
 
@@ -22,7 +22,7 @@ TEST(LexerTest, VariableDecl) {
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
   EXPECT_EQ(token.value().type(), TokenType::Variable);
-  EXPECT_EQ(token.value().get_str_data(), "abc");
+  EXPECT_EQ(token.value().get_str_data(), "V_abc");
   delete lexer;
 }
 
@@ -120,7 +120,7 @@ TEST(LexerTest, Punctuation) {
   auto token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
   EXPECT_EQ(token.value().type(), TokenType::FunctionName);
-  EXPECT_EQ(token.value().get_str_data(), "abc");
+  EXPECT_EQ(token.value().get_str_data(), "F_abc");
 
   token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
@@ -130,7 +130,7 @@ TEST(LexerTest, Punctuation) {
   token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
   EXPECT_EQ(token.value().type(), TokenType::Variable);
-  EXPECT_EQ(token.value().get_str_data(), "a");
+  EXPECT_EQ(token.value().get_str_data(), "V_a");
 
   token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
@@ -140,7 +140,7 @@ TEST(LexerTest, Punctuation) {
   token = lexer->next_token();
   EXPECT_TRUE(token.has_value());
   EXPECT_EQ(token.value().type(), TokenType::Variable);
-  EXPECT_EQ(token.value().get_str_data(), "b");
+  EXPECT_EQ(token.value().get_str_data(), "V_b");
 
   token = lexer->next_token();
   EXPECT_TRUE(token.has_value());

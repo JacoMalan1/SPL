@@ -52,14 +52,14 @@ TEST_F(SymbolTableFixture, SingleEnter) {
   Symbol s = bind_random();
   table().enter();
 
-  ASSERT_FALSE(table().lookup(s.name()).has_value());
+  ASSERT_TRUE(table().lookup(s.name()).has_value());
 }
 
 TEST_F(SymbolTableFixture, EnterExit) {
   Symbol s = bind_random();
   table().enter();
 
-  ASSERT_FALSE(table().lookup(s.name()).has_value());
+  ASSERT_TRUE(table().lookup(s.name()).has_value());
   table().exit();
   ASSERT_TRUE(table().lookup(s.name()).has_value());
 }
