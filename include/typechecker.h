@@ -37,7 +37,7 @@ private:
   std::string checkAtomic(SyntaxTreeNode *node);
   void checkAssign(SyntaxTreeNode *node);
   std::optional<std::string> checkCall(SyntaxTreeNode *node);
-  void checkFunctionArguments(const Symbol &functionSymbol, std::vector<std::string> argTypes);
+  void checkFunctionArguments(const Symbol &functionSymbol, std::vector<std::string> argTypes, int lineNumber);
   void checkBranch(SyntaxTreeNode *node);
   std::string checkTerm(SyntaxTreeNode *node);
   std::string checkOp(SyntaxTreeNode *node);

@@ -15,7 +15,7 @@ SyntaxError::SyntaxError(const std::string &msg, std::string filename, const int
   }
 }
 
-SyntaxError::SyntaxError(const std::string &msg) : msg("\033[31mType Error\033[0m: " + msg) {}
+SyntaxError::SyntaxError(const std::string &msg) : msg("\033[31mSyntax Error\033[0m: " + msg) {}
 
 const char *SyntaxError::what() const noexcept { return this->msg.c_str(); }
 
