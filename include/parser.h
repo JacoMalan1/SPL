@@ -10,13 +10,14 @@
 #include <iostream>
 #include <atomic>
 
-struct ParserException : public std::exception
+struct SyntaxError : public std::exception
 {
 private:
   std::string msg;
 
 public:
-  explicit ParserException(const std::string &msg);
+  explicit SyntaxError(const std::string &msg, std::string filename, const int &line);
+  explicit SyntaxError(const std::string &msg);
   const char *what() const noexcept override;
 };
 

@@ -3,8 +3,21 @@
 #include <sstream>
 #include <algorithm>
 
-ParserException::ParserException(const std::string &msg) : msg(msg) {}
-const char *ParserException::what() const noexcept { return this->msg.c_str(); }
+SyntaxError::SyntaxError(const std::string &msg, std::string filename, const int &line)
+{
+  if (filename.empty())
+  {
+    this->msg = "\033[31mSyntax Error\033[0m: " + msg;
+  }
+  else
+  {
+    this->msg = filename + ":" + std::to_string(line) + ": \033[31mSyntax Error\033[0m: " + msg;
+  }
+}
+
+SyntaxError::SyntaxError(const std::string &msg) : msg("\033[31mType Error\033[0m: " + msg) {}
+
+const char *SyntaxError::what() const noexcept { return this->msg.c_str(); }
 
 std::atomic<int> SyntaxTreeNode::syntaxTreeNodeCounter{0};
 
@@ -43,7 +56,7 @@ std::vector<std::string> splitCSVLine(const std::string &line)
     }
     else if (c == ',' && !inQuotes)
     {
-      result.push_back(token); // End of a field, push to result
+      result.push_back(token); // end of a field, push to result
       token.clear();
     }
     else
@@ -126,7 +139,7 @@ void Parser::loadGrammarRules(const std::string &filename)
     std::istringstream rhsStream(rhs);
     std::string symbol;
 
-    std::cout << lhs << " -> ";
+    // std::cout << lhs << " -> ";
     while (rhsStream >> symbol)
     {
       if (symbol != "''")
@@ -134,9 +147,9 @@ void Parser::loadGrammarRules(const std::string &filename)
         rhsSymbols.push_back(symbol);
       }
 
-      std::cout << symbol << " ";
+      // std::cout << symbol << " ";
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
     grammarRules.push_back({lhs, rhsSymbols});
   }
@@ -190,8 +203,6 @@ void Parser::reduce(std::pair<std::string, std::vector<std::string>> rule, int l
   std::string gotoAction = this->getAction(currentState, nonTerminal);
   if (gotoAction.empty())
   {
-    std::cerr << "Error: Missing GOTO action for state " << currentState
-              << " after reducing to non-terminal '" << nonTerminal << "'" << std::endl;
     return;
   }
 
@@ -241,7 +252,7 @@ SyntaxTreeNode *Parser::parse()
       std::string action = this->getAction(currentState, currentTokenSymbol);
 
       // print state stack
-      this->printStateStack(action);
+      // this->printStateStack(action);
 
       if (action[0] == 's')
       {
@@ -255,7 +266,7 @@ SyntaxTreeNode *Parser::parse()
         int ruleNum = std::stoi(action.substr(1));
         auto rule = grammarRules[ruleNum];
 
-        reduce(rule,  this->m_Tokens.front().get_line_number());
+        reduce(rule, this->m_Tokens.front().get_line_number());
       }
       else if (action == "acc")
       {
@@ -267,8 +278,7 @@ SyntaxTreeNode *Parser::parse()
       }
       else
       {
-        std::cerr << "Syntax Error: Unexpected token symbol " << currentTokenSymbol << " in state " << currentState << " Action: " << action << std::endl;
-        throw ParserException("Syntax Error: Unexpected token symbol " + currentTokenSymbol + " in state " + std::to_string(currentState) + " Action: " + action);
+        throw SyntaxError("Unexpected token symbol " + currentTokenSymbol + " in state " + std::to_string(currentState) + " Action: " + action);
       }
     }
   }

@@ -58,22 +58,6 @@ void TypeChecker::checkProgram(SyntaxTreeNode *node)
     {
         checkAlgo(node->getChildren()[2]);
     }
-
-    // for (auto child : node->getChildren())
-    // {
-    //     if (child->getSymbol() == "GLOBVARS")
-    //     {
-    //         checkGlobVars(child);
-    //     }
-    //     else if (child->getSymbol() == "ALGO")
-    //     {
-    //         checkAlgo(child);
-    //     }
-    //     else if (child->getSymbol() == "FUNCTIONS")
-    //     {
-    //         checkFunctions(child);
-    //     }
-    // }
 }
 
 void TypeChecker::checkGlobVars(SyntaxTreeNode *globVarsNode)
@@ -298,7 +282,7 @@ std::optional<std::string> TypeChecker::checkCall(SyntaxTreeNode *node)
         }
     }
 
-    // Check the number and types of arguments
+    // check the number and types of arguments
     checkFunctionArguments(functionSymbol.value(), argTypes);
 
     // return the function type (if any)
@@ -311,7 +295,7 @@ void TypeChecker::checkFunctionArguments(const Symbol &functionSymbol, std::vect
 
     if (argTypes.size() != expectedParamTypes.size())
     {
-        throw TypeError("Type Error: Incorrect number of arguments in function call to '" + functionSymbol.name() + "'. Expected " + std::to_string(expectedParamTypes.size()) + " but got " + std::to_string(argTypes.size()) + ".");
+        throw TypeError("Incorrect number of arguments in function call to '" + functionSymbol.name() + "'. Expected " + std::to_string(expectedParamTypes.size()) + " but got " + std::to_string(argTypes.size()));
     }
 
     // check if argument types match expected types
@@ -319,7 +303,7 @@ void TypeChecker::checkFunctionArguments(const Symbol &functionSymbol, std::vect
     {
         if (argTypes[i] != expectedParamTypes[i])
         {
-            throw TypeError("Type Error: Argument " + std::to_string(i + 1) + " in call to '" + functionSymbol.name() + "' has incorrect type. Expected " + expectedParamTypes[i] + " but got " + argTypes[i] + ".");
+            throw TypeError("Incorrect type for argument " + std::to_string(i + 1) + " in call to '" + functionSymbol.name() + "'. Expected " + expectedParamTypes[i] + " but got " + argTypes[i]);
         }
     }
 }
@@ -338,7 +322,7 @@ void TypeChecker::checkBranch(SyntaxTreeNode *node)
     }
     else
     {
-        throw TypeError("Type Error: Invalid condition type '" + condNode->getSymbol() + "'.");
+        throw TypeError("Invalid condition type '" + condNode->getSymbol() + "'.", filename, condNode->getLineNumber());
     }
 
     if (thenAlgoNode->getSymbol() == "ALGO")
@@ -350,7 +334,7 @@ void TypeChecker::checkBranch(SyntaxTreeNode *node)
     }
     else
     {
-        throw TypeError("Type Error: Invalid 'then' block type '" + thenAlgoNode->getSymbol() + "'.");
+        throw TypeError("Invalid 'then' block type '" + thenAlgoNode->getSymbol() + "'.", filename, thenAlgoNode->getLineNumber());
     }
 
     if (elseAlgoNode->getSymbol() == "ALGO")
@@ -362,7 +346,7 @@ void TypeChecker::checkBranch(SyntaxTreeNode *node)
     }
     else
     {
-        throw TypeError("Type Error: Invalid 'else' block type '" + elseAlgoNode->getSymbol() + "'.");
+        throw TypeError("Invalid 'else' block type '" + elseAlgoNode->getSymbol() + "'.", filename, elseAlgoNode->getLineNumber());
     }
 }
 
@@ -386,7 +370,7 @@ std::string TypeChecker::checkTerm(SyntaxTreeNode *node)
         }
         else
         {
-            throw TypeError("Type Error: Invalid return type for function call.");
+            throw TypeError("Invalid return type for function call.", filename, node->getChildren()[0]->getLineNumber());
         }
     }
     else if (termType == "OP")
@@ -395,7 +379,7 @@ std::string TypeChecker::checkTerm(SyntaxTreeNode *node)
     }
     else
     {
-        throw TypeError("Type Error: Invalid term type '" + termType + "'.");
+        throw TypeError("Invalid term type '" + termType + "'.");
     }
 }
 
@@ -416,7 +400,7 @@ std::string TypeChecker::checkOp(SyntaxTreeNode *node)
     }
     else
     {
-        throw TypeError("Syntax Error: Invalid operation format.");
+        throw TypeError("Invalid operation type.");
     }
 }
 
@@ -433,7 +417,7 @@ std::string TypeChecker::checkCond(SyntaxTreeNode *node)
     }
     else
     {
-        throw TypeError("Syntax Error: Invalid condition.");
+        throw TypeError("Invalid condition type.");
     }
 }
 
@@ -451,7 +435,7 @@ std::string TypeChecker::checkSimple(SyntaxTreeNode *node)
     // for binary operations, both ATOMIC values must be of the same type
     if (leftType != rightType)
     {
-        throw TypeError("Type Error: Incompatible types for binary operator '" + binOp + "'.");
+        throw TypeError("Incompatible types for binary operator '" + binOp + "'.", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
     }
 
     // ensure the BINOP is valid for the types (in this case, assume both are numeric or comparable)
@@ -459,7 +443,7 @@ std::string TypeChecker::checkSimple(SyntaxTreeNode *node)
     {
         if (leftType != "num" || rightType != "num")
         {
-            throw TypeError("Type Error: Arithmetic operator '" + binOp + "' requires numeric operands.");
+            throw TypeError("Arithmetic operator '" + binOp + "' requires numeric operands.", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
         }
     }
     else if (binOp == "eq" || binOp == "grt")
@@ -467,19 +451,19 @@ std::string TypeChecker::checkSimple(SyntaxTreeNode *node)
         // comparison operators 'eq' (equality) and 'grt' (greater than) should work with the same types
         if (leftType != rightType)
         {
-            throw TypeError("Type Error: Comparison operator '" + binOp + "' requires operands of the same type.");
+            throw TypeError("Comparison operator '" + binOp + "' requires operands of the same type.", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
         }
     }
     else if (binOp == "or" || binOp == "and")
     {
         if (leftType != "num" || rightType != "num")
         {
-            throw TypeError("Type Error: Logical operator '" + binOp + "' requires numeric (boolean) operands.");
+            throw TypeError("Logical operator '" + binOp + "' requires numeric (boolean-like) operands.", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
         }
     }
     else
     {
-        throw TypeError("Syntax Error: Unknown binary operator '" + binOp + "'.");
+        throw TypeError("Unknown binary operator type '" + binOp + "'.");
     }
 
     return "num"; // conditions ultimately return a numeric type (1 for true, 0 for false)
@@ -501,13 +485,13 @@ std::string TypeChecker::checkComposit(SyntaxTreeNode *node)
         // both simple conditions should return "num" (boolean-like numeric)
         if (leftSimpleType != "num" || rightSimpleType != "num")
         {
-            throw TypeError("Type Error: Binary operator '" + binOp + "' requires numeric (boolean) conditions.");
+            throw TypeError("Binary operator '" + binOp + "' requires numeric (boolean) conditions.", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
         }
 
         // only logical operators (and/or) are valid between two conditions
         if (binOp != "or" && binOp != "and")
         {
-            throw TypeError("Syntax Error: Binary operator '" + binOp + "' is not valid between conditions.");
+            throw TypeError("Binary operator '" + binOp + "' is not valid between conditions.", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
         }
 
         return "num"; // conditions result in a numeric (boolean-like) value
@@ -522,20 +506,20 @@ std::string TypeChecker::checkComposit(SyntaxTreeNode *node)
         // the result of a simple condition should be numeric (boolean-like)
         if (simpleNodeType != "num")
         {
-            throw TypeError("Type Error: Unary operator '" + unOp + "' requires a numeric (boolean) condition.");
+            throw TypeError("Unary operator '" + unOp + "' requires a numeric (boolean-like) condition", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
         }
 
         // only 'not' is a valid unary operator for conditions
         if (unOp != "not")
         {
-            throw TypeError("Syntax Error: Unknown unary operator '" + unOp + "' for condition.");
+            throw TypeError("Unknown unary operator type '" + unOp + "' for condition");
         }
 
         return "num"; // result of a unary operation on a condition is also numeric (boolean-like)
     }
     else
     {
-        throw TypeError("Syntax Error: Invalid composite condition.");
+        throw TypeError("Invalid composite condition type");
     }
 }
 
@@ -550,7 +534,7 @@ std::string TypeChecker::checkUnop(SyntaxTreeNode *node, SyntaxTreeNode *argNode
     {
         if (argType != "num")
         {
-            throw TypeError("Type Error: 'not' operation requires a numeric argument.");
+            throw TypeError("'not' operation requires a numeric argument.", filename, node->getChildren()[0]->getLineNumber());
         }
         return "num"; // the result of 'not' is numeric (e.g., 1 for true, 0 for false)
     }
@@ -558,13 +542,13 @@ std::string TypeChecker::checkUnop(SyntaxTreeNode *node, SyntaxTreeNode *argNode
     {
         if (argType != "num")
         {
-            throw TypeError("Type Error: 'sqrt' operation requires a numeric argument.");
+            throw TypeError("'sqrt' operation requires a numeric argument.", filename, node->getChildren()[0]->getLineNumber());
         }
         return "num"; // the result of 'sqrt' is also numeric
     }
     else
     {
-        throw TypeError("Syntax Error: Unknown unary operator '" + operatorValue + "'.");
+        throw TypeError("Unknown unary operator type '" + operatorValue + "'.");
     }
 }
 
@@ -581,7 +565,7 @@ std::string TypeChecker::checkBinop(SyntaxTreeNode *node, SyntaxTreeNode *leftAr
     {
         if (leftArgType != "num" || rightArgType != "num")
         {
-            throw TypeError("Type Error: Arithmetic operators '" + operatorValue + "' require both arguments to be numeric.");
+            throw TypeError("Arithmetic operator '" + operatorValue + "' require both arguments to be numeric.", filename, node->getChildren()[0]->getLineNumber());
         }
         return "num"; // arithmetic operations result in a numeric type
     }
@@ -590,7 +574,7 @@ std::string TypeChecker::checkBinop(SyntaxTreeNode *node, SyntaxTreeNode *leftAr
     {
         if (leftArgType != rightArgType)
         {
-            throw TypeError("Type Error: Binary operator '" + operatorValue + "' requires both arguments to be of the same type.");
+            throw TypeError("Binary operator '" + operatorValue + "' requires both arguments to be of the same type.", filename, node->getChildren()[0]->getLineNumber());
         }
 
         // 'or' and 'and' return numeric types, comparisons return boolean-like numeric types (1 or 0)
@@ -605,7 +589,7 @@ std::string TypeChecker::checkBinop(SyntaxTreeNode *node, SyntaxTreeNode *leftAr
     }
     else
     {
-        throw TypeError("Syntax Error: Unknown binary operator '" + operatorValue + "'.");
+        throw TypeError("Unknown binary operator type '" + operatorValue + "'.");
     }
 }
 
@@ -624,7 +608,7 @@ std::string TypeChecker::checkArg(SyntaxTreeNode *node)
     }
     else
     {
-        throw TypeError("Syntax Error: Invalid argument type.");
+        throw TypeError("Invalid argument type.");
     }
 }
 
