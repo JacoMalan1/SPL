@@ -41,3 +41,29 @@ begin
         end
     print V_result;
 end
+
+
+main
+num V_var1, num V_var2, num V_var3, num V_result, 
+begin
+    V_var1 = 5;
+    V_var2 = 6;
+    F_func1 ( V_var1, V_var2, V_var3 );
+    if eq ( V_var1, V_var2 ) then
+        begin
+            V_result = 3;
+        end
+    else
+        begin
+            V_result = 4;
+        end
+end
+
+void F_func1 ( V_var1, V_var2, V_var3 )
+{
+    num V_var10, num V_var11, num V_var12,
+    begin
+    V_var1 = "Yoo";
+    end
+}
+end

@@ -18,10 +18,8 @@ public:
   bool operator==(const Symbol &other) const;
 
   std::vector<std::string> getParamTypes() const;
-  std::string getReturnType() const;
 
   void setParamTypes(std::vector<std::string> paramTypes);
-  void setReturnType(std::string returnType);
 
 private:
   std::string m_Ident;

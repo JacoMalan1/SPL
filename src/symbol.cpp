@@ -17,19 +17,9 @@ std::vector<std::string> Symbol::getParamTypes() const
   return this->paramTypes;
 }
 
-std::string Symbol::getReturnType() const
-{
-  return this->returnType;
-}
-
 void Symbol::setParamTypes(std::vector<std::string> paramTypes)
 {
   this->paramTypes = paramTypes;
-}
-
-void Symbol::setReturnType(std::string returnType)
-{
-  this->returnType = returnType;
 }
 
 SymbolTable::SymbolTable() : m_Parent(nullptr) {}

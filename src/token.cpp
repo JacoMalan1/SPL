@@ -168,7 +168,7 @@ std::string keyword_to_string(enum Keyword keyword)
     return "print";
     break;
   case Keyword::Input:
-    return "input";
+    return "<input";
     break;
   case Keyword::If:
     return "if";

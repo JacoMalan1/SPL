@@ -249,7 +249,7 @@ void TypeChecker::checkAssign(SyntaxTreeNode *node)
         // compare the type of the variable and the term
         if (varSymbol->type() != termType)
         {
-            throw TypeError("Type mismatch in assignment to '" + varname + "'", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
+            throw TypeError("Cannot assign value of type '" + termType + "' to variable '" + varname + "' of type '" + varSymbol->type() + "'", filename, node->getChildren()[0]->getChildren()[0]->getLineNumber());
         }
     }
 }
@@ -283,19 +283,19 @@ std::optional<std::string> TypeChecker::checkCall(SyntaxTreeNode *node)
     }
 
     // check the number and types of arguments
-    checkFunctionArguments(functionSymbol.value(), argTypes);
+    checkFunctionArguments(functionSymbol.value(), argTypes, node->getChildren()[0]->getChildren()[0]->getLineNumber());
 
     // return the function type (if any)
-    return functionSymbol.value().getReturnType();
+    return functionSymbol.value().type();
 }
 
-void TypeChecker::checkFunctionArguments(const Symbol &functionSymbol, std::vector<std::string> argTypes)
+void TypeChecker::checkFunctionArguments(const Symbol &functionSymbol, std::vector<std::string> argTypes, int lineNumber)
 {
     std::vector<std::string> expectedParamTypes = functionSymbol.getParamTypes();
 
     if (argTypes.size() != expectedParamTypes.size())
     {
-        throw TypeError("Incorrect number of arguments in function call to '" + functionSymbol.name() + "'. Expected " + std::to_string(expectedParamTypes.size()) + " but got " + std::to_string(argTypes.size()));
+        throw TypeError("Incorrect number of arguments in function call to '" + functionSymbol.name() + "'. Expected " + std::to_string(expectedParamTypes.size()) + " but got " + std::to_string(argTypes.size()), filename, lineNumber);
     }
 
     // check if argument types match expected types
@@ -303,7 +303,7 @@ void TypeChecker::checkFunctionArguments(const Symbol &functionSymbol, std::vect
     {
         if (argTypes[i] != expectedParamTypes[i])
         {
-            throw TypeError("Incorrect type for argument " + std::to_string(i + 1) + " in call to '" + functionSymbol.name() + "'. Expected " + expectedParamTypes[i] + " but got " + argTypes[i]);
+            throw TypeError("Incorrect type for argument " + std::to_string(i + 1) + " in call to '" + functionSymbol.name() + "'. Expected " + expectedParamTypes[i] + " but got " + argTypes[i], filename, lineNumber);
         }
     }
 }
@@ -647,7 +647,7 @@ void TypeChecker::checkDecl(SyntaxTreeNode *node)
 void TypeChecker::checkHeader(SyntaxTreeNode *node)
 {
     // HEADER -> FTYP FNAME ( VNAME , VNAME , VNAME )
-    std::string returnType = node->getChildren()[0]->getChildren()[0]->getActualValue();   // FTYP (function return type)
+    std::string returnType = node->getChildren()[0]->getChildren()[0]->getSymbol();   // FTYP (function return type)
     std::string functionName = node->getChildren()[1]->getChildren()[0]->getActualValue(); // FNAME (function name)
 
     // parameter types (assuming exactly 3 parameters as specified by the grammar)
@@ -658,7 +658,14 @@ void TypeChecker::checkHeader(SyntaxTreeNode *node)
         int index = paramIndexes[m];
 
         std::string paramName = node->getChildren()[index]->getChildren()[0]->getActualValue(); // get the parameter name (variable name)
-        std::string paramType = symbolTable->lookup(paramName)->type();                         // lookup type of each parameter
+
+        // check if the parameter is already declared in the symbol table
+        if (symbolTable->lookup(paramName) == std::nullopt)
+        {
+            throw TypeError("Parameter variable '" + paramName + "' was not declared.", filename, node->getChildren()[index]->getChildren()[0]->getLineNumber());
+        }
+
+        std::string paramType = symbolTable->lookup(paramName).value().type(); // lookup type of each parameter
         paramTypes.push_back(paramType);
     }
 
@@ -667,7 +674,6 @@ void TypeChecker::checkHeader(SyntaxTreeNode *node)
 
     // store the parameter types and return type in the function's symbol
     functionSymbol.setParamTypes(paramTypes);
-    functionSymbol.setReturnType(returnType);
 
     symbolTable->bind(functionSymbol); // bind the function name in the current scope
 }
@@ -677,23 +683,24 @@ void TypeChecker::checkBody(SyntaxTreeNode *node)
     // BODY -> PROLOG LOCVARS ALGO EPILOG SUBFUNCS end
     symbolTable->enter(); // enter a new scope for the function body
 
-    for (auto child : node->getChildren())
+    // start by checking local variables variables first
+    if (node->getChildren()[1]->getSymbol() == "LOCVARS")
     {
-        if (child->getSymbol() == "LOCVARS")
-        {
-            // check local variables
-            checkLocVars(child);
-        }
-        else if (child->getSymbol() == "ALGO")
-        {
-            // check the algorithm (instructions)
-            checkAlgo(child);
-        }
-        else if (child->getSymbol() == "SUBFUNCS")
-        {
-            // check subfunctions if present
-            checkFunctions(child); // recursive call for any nested functions
-        }
+        // check local variables
+        checkLocVars(node->getChildren()[1]);
+    }
+
+    // next, check subfunction declarations, if any
+    if (node->getChildren()[4]->getSymbol() == "SUBFUNCS")
+    {
+        checkFunctions(node->getChildren()[4]->getChildren()[0]);
+    }
+
+    // finally, check the function algorithm block
+    if (node->getChildren()[2]->getSymbol() == "ALGO")
+    {
+        // check the algorithm (instructions)
+        checkAlgo(node->getChildren()[2]);
     }
 
     symbolTable->exit(); // exit the function's scope
